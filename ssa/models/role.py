@@ -1,9 +1,7 @@
 from enum import Enum
 
 
-# What a column means, set during configuration. Templates and SQL generation
-# key off the role, not the column name. Subclasses str so a Role compares and
-# serialises as its value ("measure").
+# A column's semantic role, assigned during configuration.
 class Role(str, Enum):
     UNASSIGNED = "unassigned"
     IDENTIFIER = "identifier"
