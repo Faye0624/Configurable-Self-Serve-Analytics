@@ -1,0 +1,10 @@
+# Core app dependencies
+streamlit>=1.36      # web UI
+duckdb>=1.0          # embedded analytical database: stores uploaded tables, runs generated SQL
+pandas>=2.2          # CSV loading + light data wrangling
+
+# Added in later steps as the features land:
+# plotly            -> dashboard charts (Step 9)
+# sqlglot           -> parse/validate generated SQL for NL->SQL safety (Step 10)
+# python-dotenv     -> load the LLM API key from a .env file (Step 10)
+# openai            -> NL->SQL model client (Step 10)

@@ -1,0 +1,22 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- Secrets / config ---
+.env
+*.env
+!.env.example
+
+# --- Data & database artifacts (don't commit uploaded data or the DB file) ---
+*.duckdb
+*.duckdb.wal
+data/uploads/
+
+# --- OS / IDE ---
+.DS_Store
+.idea/
+.vscode/
