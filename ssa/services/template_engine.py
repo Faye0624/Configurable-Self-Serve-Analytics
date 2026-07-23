@@ -70,3 +70,35 @@ class TemplateEngine:
             f'FROM activity GROUP BY cohort_month, period ORDER BY cohort_month, period'
         )
         return sql, self._db.query(sql)
+
+    # RFM: per entity, Recency (days since last activity, measured against the
+    # dataset's latest date so it stays reproducible), Frequency (# activities)
+    # and Monetary (total), each scored 1-5 with ntile.
+    def run_rfm(self, project: Project) -> tuple[str, pd.DataFrame]:
+        ti, id_col = _first_with_role(project, Role.IDENTIFIER)
+        td, dt_col = _first_with_role(project, Role.DATE)
+        tm, me_col = _first_with_role(project, Role.MEASURE)
+        if not (id_col and dt_col and me_col):
+            raise ValueError("RFM needs 'identifier', 'date' and 'measure' columns")
+        if not (ti is td is tm):
+            raise ValueError("RFM currently needs identifier, date and measure in the same table")
+
+        t, i, d, m = ti.name, id_col.name, dt_col.name, me_col.name
+        sql = (
+            f'WITH events AS (\n'
+            f'    SELECT "{i}" AS entity, CAST("{d}" AS TIMESTAMP) AS ts, "{m}" AS amount FROM "{t}"\n'
+            f'),\n'
+            f'per_entity AS (\n'
+            f'    SELECT entity,\n'
+            f'           date_diff(\'day\', max(ts), (SELECT max(ts) FROM events)) AS recency_days,\n'
+            f'           count(*) AS frequency,\n'
+            f'           sum(amount) AS monetary\n'
+            f'    FROM events GROUP BY entity\n'
+            f')\n'
+            f'SELECT entity, recency_days, frequency, monetary,\n'
+            f'       ntile(5) OVER (ORDER BY recency_days DESC) AS r_score,\n'
+            f'       ntile(5) OVER (ORDER BY frequency ASC) AS f_score,\n'
+            f'       ntile(5) OVER (ORDER BY monetary ASC) AS m_score\n'
+            f'FROM per_entity ORDER BY monetary DESC'
+        )
+        return sql, self._db.query(sql)
