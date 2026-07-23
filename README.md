@@ -41,4 +41,7 @@ configuration alone — no code changes. Demonstrated on the public Olist e-comm
 ## Status
 
 Built incrementally, one module per commit (see the commit history).
-Current: **project scaffold** — runnable UI shell; features added step by step.
+Current: **interactive app** — upload wizard (upload → clean → configure) and a
+progressive-unlock dashboard (KPI / cohort / RFM) with per-analysis SQL and CSV
+export. Next: natural-language querying (NL→SQL). The UI is a thin layer over the
+`ssa` services — all analysis logic lives there.
