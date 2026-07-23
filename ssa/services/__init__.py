@@ -4,6 +4,7 @@ from ssa.services.profiling import ProfilingService
 from ssa.services.cleaning import CleaningService
 from ssa.services.semantic_config import SemanticConfigService
 from ssa.services.unlock_engine import UnlockEngine, UnlockResult
+from ssa.services.template_engine import TemplateEngine
 
 __all__ = [
     "DataRegistry",
@@ -12,4 +13,5 @@ __all__ = [
     "SemanticConfigService",
     "UnlockEngine",
     "UnlockResult",
+    "TemplateEngine",
 ]
