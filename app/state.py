@@ -13,10 +13,12 @@ from dataclasses import dataclass
 import streamlit as st
 
 from ssa.db import Database
+from ssa.llm import build_default_client
 from ssa.models import Project
 from ssa.services import (
     CleaningService,
     DataRegistry,
+    NLQueryEngine,
     ProfilingService,
     SemanticConfigService,
     TemplateEngine,
@@ -36,6 +38,7 @@ class Workspace:
     config: SemanticConfigService
     unlock: UnlockEngine
     templates: TemplateEngine
+    nl: NLQueryEngine
 
 
 def get_workspace() -> Workspace:
@@ -51,5 +54,6 @@ def get_workspace() -> Workspace:
             config=SemanticConfigService(),
             unlock=UnlockEngine(),
             templates=TemplateEngine(db),
+            nl=NLQueryEngine(db, build_default_client()),
         )
     return st.session_state.workspace

@@ -37,6 +37,24 @@ def cohort_heatmap(matrix: pd.DataFrame):
     return fig
 
 
+def nl_answer_figure(df: pd.DataFrame):
+    """Best-effort chart for an arbitrary NL result.
+
+    If the result is a label column + a numeric column, draw a bar chart;
+    otherwise return None and let the caller show the table instead.
+    """
+    if df is None or df.shape[1] != 2 or len(df) == 0:
+        return None
+    label, value = df.columns[0], df.columns[1]
+    if not pd.api.types.is_numeric_dtype(df[value]) or pd.api.types.is_numeric_dtype(df[label]):
+        return None
+    top = df.nlargest(min(20, len(df)), value)
+    fig = px.bar(top, x=label, y=value)
+    fig.update_traces(marker_color=_BAR_COLOR)
+    fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=300, xaxis_title=None)
+    return fig
+
+
 def rfm_score_bars(df: pd.DataFrame, score: str = "r_score"):
     """Bar chart of how many entities fall in each 1-5 score bucket."""
     counts = (df.groupby(score).size().reset_index(name="entities")
