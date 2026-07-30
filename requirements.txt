@@ -3,8 +3,9 @@ streamlit>=1.49      # web UI (uses the width="stretch" layout API)
 duckdb>=1.0          # embedded analytical database: stores uploaded tables, runs generated SQL
 pandas>=2.2          # CSV loading + light data wrangling
 plotly>=5.22         # dashboard charts (Step 9)
+sqlglot>=25          # parse/validate generated SQL — read-only safety (Step 10)
 
-# Added in later steps as the features land:
-# sqlglot           -> parse/validate generated SQL for NL->SQL safety (Step 10)
-# python-dotenv     -> load the LLM API key from a .env file (Step 10)
-# openai            -> NL->SQL model client (Step 10)
+# Optional: only needed for the real (LLM-backed) NL->SQL client. Without these
+# the app falls back to the offline stub, so they are not required to run it.
+python-dotenv>=1.0   # load the LLM API key from a local .env file
+openai>=1.30         # NL->SQL model client (used when OPENAI_API_KEY is set)
