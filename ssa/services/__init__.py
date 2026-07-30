@@ -5,6 +5,8 @@ from ssa.services.cleaning import CleaningService
 from ssa.services.semantic_config import SemanticConfigService
 from ssa.services.unlock_engine import UnlockEngine, UnlockResult
 from ssa.services.template_engine import TemplateEngine
+from ssa.services.sql_guard import SqlGuard, SqlGuardError
+from ssa.services.nl_query import NLQueryEngine, QueryResult, HistoryEntry
 
 __all__ = [
     "DataRegistry",
@@ -15,4 +17,9 @@ __all__ = [
     "UnlockEngine",
     "UnlockResult",
     "TemplateEngine",
+    "SqlGuard",
+    "SqlGuardError",
+    "NLQueryEngine",
+    "QueryResult",
+    "HistoryEntry",
 ]
