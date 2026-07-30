@@ -41,7 +41,9 @@ configuration alone — no code changes. Demonstrated on the public Olist e-comm
 ## Status
 
 Built incrementally, one module per commit (see the commit history).
-Current: **interactive app** — upload wizard (upload → clean → configure) and a
-progressive-unlock dashboard (KPI / cohort / RFM) with per-analysis SQL and CSV
-export. Next: natural-language querying (NL→SQL). The UI is a thin layer over the
-`ssa` services — all analysis logic lives there.
+Current: **MVP** — upload wizard (upload → clean → configure), a progressive-unlock
+dashboard (KPI / cohort / RFM), and **natural-language querying** (NL→SQL) that
+shows and downloads the generated SQL, validates it is read-only before running,
+and re-runs saved queries without calling the model. Works offline with a
+rule-based stub; a real model is used when `OPENAI_API_KEY` is set. Next: tests &
+evaluation. The UI is a thin layer over the `ssa` services — all logic lives there.
