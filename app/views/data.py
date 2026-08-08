@@ -195,4 +195,4 @@ def _role_editor(ws: Workspace, table) -> None:
         if is_key:
             ws.config.set_join_key(table, col.name, col.key_name or col.name)
         else:
-            col.is_join_key = False  # no service "unset"; clearing the flag is UI state
+            ws.config.clear_join_key(table, col.name)

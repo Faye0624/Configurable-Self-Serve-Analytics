@@ -22,6 +22,13 @@ class SemanticConfigService:
         col.is_join_key = True
         col.key_name = key_name or column_name
 
+    # Unmark a column as a join key (mirror of set_join_key), so the UI can
+    # clear the flag through the service instead of touching the model directly.
+    def clear_join_key(self, table: DatasetTable, column_name: str) -> None:
+        col = self._find(table, column_name)
+        col.is_join_key = False
+        col.key_name = ""
+
     # Pre-fill likely roles and join keys from column names + types, for the
     # user to confirm or change (US8). Heuristic starting point only.
     def suggest(self, table: DatasetTable) -> None:
