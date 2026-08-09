@@ -131,7 +131,7 @@ def _step_configure(ws: Workspace) -> None:
 
     table = next(t for t in ws.project.tables if t.name == name)
     st.success(f"Stored as `{table.name}`. Confirm the roles and join keys below.")
-    _role_editor(ws, table)
+    _role_editor(ws, table, scope="wizard")
 
     back, done = st.columns(2)
     if back.button("← Back", key="cfg_back"):
@@ -155,7 +155,7 @@ def _uploaded_tables(ws: Workspace) -> None:
     for table in ws.project.tables:
         header = f"{table.name} · {table.row_count:,} rows × {len(table.columns)} cols"
         with st.expander(header):
-            _role_editor(ws, table)
+            _role_editor(ws, table, scope="tables")
             if st.button("Preview rows", key=f"preview_{table.name}"):
                 st.dataframe(
                     ws.db.query(f'SELECT * FROM "{table.name}" LIMIT 50'),
@@ -166,7 +166,10 @@ def _uploaded_tables(ws: Workspace) -> None:
 # --------------------------------------------------------------------------- #
 # Shared: roles & keys editor (US6/US7/US8)
 # --------------------------------------------------------------------------- #
-def _role_editor(ws: Workspace, table) -> None:
+def _role_editor(ws: Workspace, table, scope: str) -> None:
+    # `scope` disambiguates widget keys: the same table's editor is rendered
+    # both in the upload wizard and in the "Uploaded tables" tab, and Streamlit
+    # renders every tab, so the keys must differ between the two call sites.
     st.markdown("**Configure — roles & keys**")
     head = st.columns([3, 3, 2, 4])
     head[0].caption("Column")
@@ -180,12 +183,12 @@ def _role_editor(ws: Workspace, table) -> None:
 
         role = row[1].selectbox(
             "Role", ROLE_OPTIONS, index=ROLE_OPTIONS.index(col.role),
-            key=f"role_{table.name}_{col.name}", label_visibility="collapsed",
+            key=f"role_{scope}_{table.name}_{col.name}", label_visibility="collapsed",
             format_func=lambda r: str(r).title(),
         )
         is_key = row[2].checkbox(
             "Join key", value=col.is_join_key,
-            key=f"key_{table.name}_{col.name}", label_visibility="collapsed",
+            key=f"key_{scope}_{table.name}_{col.name}", label_visibility="collapsed",
         )
         row[3].caption(
             f"{col.data_type} · {col.null_pct}% null · {col.distinct_count} distinct"
