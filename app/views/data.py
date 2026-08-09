@@ -96,8 +96,9 @@ def _step_clean(ws: Workspace) -> None:
     if issues:
         for issue in issues:
             st.warning(issue)
-        st.caption("Guided/AI fixes for these come with Step 10 (US5); for now they "
-                   "are surfaced for you to confirm before configuring.")
+        st.caption("The LLM API isn't wired in yet — AI-assisted fix suggestions "
+                   "may appear here later (part of US5). For now these issues are "
+                   "surfaced for you to review.")
     else:
         st.caption("No suspicious columns detected.")
 
