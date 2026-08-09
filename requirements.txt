@@ -9,3 +9,6 @@ sqlglot>=25          # parse/validate generated SQL — read-only safety (Step 1
 # the app falls back to the offline stub, so they are not required to run it.
 python-dotenv>=1.0   # load the LLM API key from a local .env file
 openai>=1.30         # NL->SQL model client (used when OPENAI_API_KEY is set)
+
+# Development / testing
+pytest>=8            # unit tests (run: pytest)
