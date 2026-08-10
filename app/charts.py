@@ -55,13 +55,18 @@ def nl_answer_figure(df: pd.DataFrame):
     return fig
 
 
-def rfm_score_bars(df: pd.DataFrame, score: str = "r_score"):
-    """Bar chart of how many entities fall in each 1-5 score bucket."""
-    counts = (df.groupby(score).size().reset_index(name="entities")
-              .sort_values(score))
-    fig = px.bar(counts, x=score, y="entities")
-    fig.update_traces(marker_color=_BAR_COLOR)
-    fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=280,
-                      xaxis_title=f"{score} (1 = low, 5 = high)", yaxis_title="entities")
+def rfm_heatmap(df: pd.DataFrame):
+    """Classic RFM grid: Recency score (x) × Frequency score (y), each cell
+    coloured/labelled by how many customers fall in that R-F combination.
+    Top-right = recent & frequent (best); bottom-left = lapsed."""
+    grid = (pd.crosstab(df["f_score"], df["r_score"])
+            .reindex(index=range(5, 0, -1), columns=range(1, 6))  # F=5 on top
+            .fillna(0).astype(int))
+    fig = px.imshow(grid, text_auto=True, aspect="auto",
+                    color_continuous_scale="Blues",
+                    labels=dict(x="Recency score (R)", y="Frequency score (F)",
+                                color="customers"))
+    fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=300)
     fig.update_xaxes(dtick=1)
+    fig.update_yaxes(dtick=1)
     return fig

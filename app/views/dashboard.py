@@ -135,7 +135,7 @@ def _draw_cohort(df) -> None:
 
 
 def _draw_rfm(df) -> None:
-    st.plotly_chart(charts.rfm_score_bars(df, "r_score"), width="stretch")
+    st.plotly_chart(charts.rfm_heatmap(df), width="stretch")
     with st.expander("Top entities by monetary value"):
         st.dataframe(df.head(20), width="stretch")
 
