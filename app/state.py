@@ -44,7 +44,10 @@ class Workspace:
 def get_workspace() -> Workspace:
     """Return this session's Workspace, creating it on first use."""
     if "workspace" not in st.session_state:
-        db = Database()  # in-memory DuckDB, scoped to this session
+        db = Database()  # in-memory analytical DB (data re-uploaded each session)
+        # Durable, file-backed DuckDB for the query log so history survives
+        # restarts (US22). Kept separate from the analytical DB on purpose.
+        history_db = Database("query_history.duckdb")
         st.session_state.workspace = Workspace(
             db=db,
             registry=DataRegistry(db),
@@ -54,6 +57,6 @@ def get_workspace() -> Workspace:
             config=SemanticConfigService(),
             unlock=UnlockEngine(),
             templates=TemplateEngine(db),
-            nl=NLQueryEngine(db, build_default_client()),
+            nl=NLQueryEngine(db, build_default_client(), history_db=history_db),
         )
     return st.session_state.workspace

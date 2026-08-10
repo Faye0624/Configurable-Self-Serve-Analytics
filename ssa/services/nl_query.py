@@ -23,6 +23,9 @@ from ssa.llm.base import LLMClient
 from ssa.llm.schema import build_schema
 from ssa.services.sql_guard import SqlGuard, SqlGuardError
 
+# Table that the durable query log lives in, inside the (optional) history DB.
+_HISTORY_TABLE = "_query_history"
+
 
 @dataclass
 class QueryResult:
@@ -47,11 +50,18 @@ class HistoryEntry:
 class NLQueryEngine:
     MAX_ROWS = 5000  # cap returned rows so a broad query can't flood the UI
 
-    def __init__(self, db: Database, llm: LLMClient, guard: SqlGuard | None = None):
+    def __init__(self, db: Database, llm: LLMClient, guard: SqlGuard | None = None,
+                 history_db: Database | None = None):
         self._db = db
         self._llm = llm
         self._guard = guard or SqlGuard()
+        # Optional durable store for the query log (US22). When given, history
+        # survives restarts; when None, it lives only in memory for this session.
+        self._history_db = history_db
         self.history: list[HistoryEntry] = []
+        if history_db is not None:
+            self._ensure_history_table()
+            self.history = self._load_history()
 
     @property
     def backend_name(self) -> str:
@@ -80,7 +90,7 @@ class NLQueryEngine:
         except Exception as exc:
             return QueryResult(question, sql=safe_sql, error=f"couldn't run the query: {exc}")
 
-        self.history.insert(0, HistoryEntry(question, safe_sql, _timestamp()))
+        self._record(HistoryEntry(question, safe_sql, _timestamp()))
         return QueryResult(question, sql=safe_sql, data=data)
 
     # US22: replay a stored query by running its SQL directly — no model call.
@@ -104,6 +114,33 @@ class NLQueryEngine:
     def _execute(self, sql: str) -> pd.DataFrame:
         return self._db.query(sql).head(self.MAX_ROWS)
 
+    # -- durable query log (US22) ----------------------------------------- #
+    # The log is a table in a separate history DB, not the analytical DB, so it
+    # is never visible to user queries (the guard's allow-list is the project
+    # schema, which does not include this table).
+    def _ensure_history_table(self) -> None:
+        self._history_db.execute(
+            f'CREATE TABLE IF NOT EXISTS "{_HISTORY_TABLE}" '
+            "(asked_at VARCHAR, question VARCHAR, generated_sql VARCHAR)"
+        )
+
+    def _load_history(self) -> list[HistoryEntry]:
+        rows = self._history_db.query(
+            f'SELECT asked_at, question, generated_sql FROM "{_HISTORY_TABLE}" '
+            "ORDER BY rowid DESC"
+        )
+        return [HistoryEntry(r.question, r.generated_sql, r.asked_at)
+                for r in rows.itertuples()]
+
+    def _record(self, entry: HistoryEntry) -> None:
+        self.history.insert(0, entry)  # newest first, in memory
+        if self._history_db is not None:
+            self._history_db.execute(
+                f'INSERT INTO "{_HISTORY_TABLE}" (asked_at, question, generated_sql) '
+                "VALUES (?, ?, ?)",
+                [entry.when, entry.question, entry.sql],
+            )
+
 
 def _timestamp() -> str:
-    return datetime.now().strftime("%H:%M:%S")
+    return datetime.now().strftime("%Y-%m-%d %H:%M")
