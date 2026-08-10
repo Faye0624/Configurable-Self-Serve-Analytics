@@ -9,19 +9,11 @@ A small filter bar drives the key-metrics breakdown. All SQL and aggregation
 happen in ``ssa.TemplateEngine``; this view only renders what it returns.
 """
 
-import sqlglot
 import streamlit as st
 
 import charts
+from formatting import pretty_sql
 from state import Workspace, get_workspace
-
-
-def _pretty_sql(sql: str) -> str:
-    """Format SQL onto multiple indented lines so it reads top-to-bottom."""
-    try:
-        return sqlglot.transpile(sql, read="duckdb", pretty=True)[0]
-    except Exception:
-        return sql
 
 # Columns the key-metrics query always returns; anything else in front is the
 # grouping dimension.
@@ -152,7 +144,7 @@ def _locked_card(result) -> None:
 def _sql_and_download(sql: str, df, key: str) -> None:
     """Show the generated SQL and let the result be downloaded (US16/US21 groundwork)."""
     with st.expander("Show SQL"):
-        st.code(_pretty_sql(sql), language="sql", wrap_lines=True)
+        st.code(pretty_sql(sql), language="sql", wrap_lines=True)
     st.download_button(
         "Download result (CSV)", df.to_csv(index=False),
         file_name=f"{key}_result.csv", mime="text/csv", key=f"dl_{key}",

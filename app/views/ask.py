@@ -9,6 +9,7 @@ call). Before the first question it makes clear what is sent to the model.
 import streamlit as st
 
 import charts
+from formatting import pretty_sql
 from state import Workspace, get_workspace
 
 
@@ -80,7 +81,7 @@ def _render_last_result() -> None:
 # US16: show the generated SQL and let it be downloaded / copied.
 def _sql_block(sql: str, key: str) -> None:
     with st.expander("Show generated SQL", expanded=True):
-        st.code(sql, language="sql")
+        st.code(pretty_sql(sql), language="sql", wrap_lines=True)
         st.download_button("Download SQL", sql, file_name="query.sql",
                            mime="text/sql", key=f"dlsql_{key}")
 
