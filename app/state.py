@@ -23,6 +23,7 @@ from ssa.services import (
     SemanticConfigService,
     TemplateEngine,
     UnlockEngine,
+    load_project,
 )
 
 
@@ -44,14 +45,19 @@ class Workspace:
 def get_workspace() -> Workspace:
     """Return this session's Workspace, creating it on first use."""
     if "workspace" not in st.session_state:
-        db = Database()  # in-memory analytical DB (data re-uploaded each session)
-        # Durable, file-backed DuckDB for the query log so history survives
-        # restarts (US22). Kept separate from the analytical DB on purpose.
+        # File-backed analytical DB so uploaded tables persist across restarts.
+        db = Database("workspace.duckdb")
+        # Restore the saved project config (roles/keys/profiling); the data
+        # tables are already in the file, so the project reopens ready to use.
+        project = load_project(db) or Project(name="Demo project")
+        registry = DataRegistry(db)
+        registry.tables = {t.name: t for t in project.tables}
+        # Durable query log, kept in its own file (US22).
         history_db = Database("query_history.duckdb")
         st.session_state.workspace = Workspace(
             db=db,
-            registry=DataRegistry(db),
-            project=Project(name="Demo project"),
+            registry=registry,
+            project=project,
             profiler=ProfilingService(),
             cleaner=CleaningService(),
             config=SemanticConfigService(),

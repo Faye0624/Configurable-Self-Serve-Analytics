@@ -15,7 +15,7 @@ import pandas as pd
 import streamlit as st
 
 from ssa.models import Role
-from ssa.services import safe_table_name
+from ssa.services import safe_table_name, save_project
 from state import Workspace, get_workspace
 
 # Order shown in the role dropdown.
@@ -41,6 +41,9 @@ def render() -> None:
         _wizard(ws)
     with tables_tab:
         _uploaded_tables(ws)
+
+    # Persist the project config after any change so it survives a restart.
+    save_project(ws.db, ws.project)
 
 
 # --------------------------------------------------------------------------- #
