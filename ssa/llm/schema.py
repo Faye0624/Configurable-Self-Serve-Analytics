@@ -10,6 +10,17 @@ from dataclasses import dataclass
 
 from ssa.models import Project, Role
 
+# Map pandas dtypes to SQL-ish types so the model knows how a column is stored
+# (e.g. a date kept as TEXT must be CAST before date functions work).
+_SQL_TYPES = {"object": "TEXT", "string": "TEXT", "bool": "BOOLEAN",
+              "datetime": "TIMESTAMP", "date": "DATE", "int": "BIGINT",
+              "float": "DOUBLE"}
+
+
+def _sql_type(dtype: str) -> str:
+    d = dtype.lower()
+    return next((sql for key, sql in _SQL_TYPES.items() if key in d), "TEXT")
+
 
 @dataclass(frozen=True)
 class SchemaColumn:
@@ -36,8 +47,8 @@ class Schema:
         lines = []
         for table in self.tables:
             cols = ", ".join(
-                c.name
-                + (f":{c.role}" if c.role != str(Role.UNASSIGNED) else "")
+                f"{c.name} {_sql_type(c.data_type)}"
+                + (f" [{c.role}]" if c.role != str(Role.UNASSIGNED) else "")
                 for c in table.columns
             )
             lines.append(f"TABLE {table.name}({cols})")

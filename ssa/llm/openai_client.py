@@ -15,7 +15,11 @@ _SYSTEM_PROMPT = (
     "You translate a business question into ONE read-only SQL query for DuckDB. "
     "Rules: return a single SELECT statement only (no INSERT/UPDATE/DELETE/DDL, "
     "no comments, no explanation). Use only the tables and columns in the schema. "
-    "Quote identifiers with double quotes. Output SQL only."
+    "Quote identifiers with double quotes. "
+    "Date/time values stored as TEXT must be CAST before using date functions, "
+    'e.g. date_trunc(\'month\', CAST("order_date" AS TIMESTAMP)) or '
+    'strftime(CAST("order_date" AS TIMESTAMP), \'%Y-%m\'). '
+    "Output SQL only."
 )
 
 
