@@ -12,8 +12,8 @@ import plotly.express as px
 _BAR_COLOR = "#4C6FFF"
 
 
-def kpi_bar(df: pd.DataFrame, dimension: str, value: str = "total"):
-    """Bar chart of a measure totalled by a dimension (KPI, grouped)."""
+def metric_bar(df: pd.DataFrame, dimension: str, value: str = "total"):
+    """Bar chart of a measure totalled by a dimension (key metric, grouped)."""
     fig = px.bar(df, x=dimension, y=value)
     fig.update_traces(marker_color=_BAR_COLOR)
     fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=280,

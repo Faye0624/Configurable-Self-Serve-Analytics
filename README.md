@@ -8,7 +8,7 @@ Non-technical users upload their own data and get insights without writing SQL:
    anything suspicious is flagged for the user to confirm.
 3. **Configure (no code)** — map each column to a *role* (customer / date / amount / …)
    and declare join keys.
-4. **Progressive unlock** — analyses (KPIs, cohort / retention, RFM) unlock automatically
+4. **Progressive unlock** — analyses (key metrics, cohort / retention, RFM) unlock automatically
    as the data satisfies each template's requirements.
 5. **Ask** — query in natural language; the tool shows the **generated SQL** behind every answer.
 
@@ -42,7 +42,7 @@ configuration alone — no code changes. Demonstrated on the public Olist e-comm
 
 Built incrementally, one module per commit (see the commit history).
 Current: **MVP** — upload wizard (upload → clean → configure), a progressive-unlock
-dashboard (KPI / cohort / RFM), and **natural-language querying** (NL→SQL) that
+dashboard (key metrics / cohort / RFM), and **natural-language querying** (NL→SQL) that
 shows and downloads the generated SQL, validates it is read-only before running,
 and re-runs saved queries without calling the model. Works offline with a
 rule-based stub; a real model is used when `OPENAI_API_KEY` is set. Next: tests &

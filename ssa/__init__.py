@@ -2,7 +2,7 @@
 
 Configurable, transparent self-serve data-analysis engine:
 upload CSV -> profile & clean -> semantic config -> progressive-unlock
-analyses (KPI / cohort / RFM) -> natural-language query (NL->SQL).
+analyses (key metrics / cohort / RFM) -> natural-language query (NL->SQL).
 
 Sub-packages (added step by step in later commits):
     models/    domain objects (Project, DatasetTable, Column, Role)

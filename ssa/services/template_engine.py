@@ -23,11 +23,12 @@ class TemplateEngine:
     def __init__(self, db: Database):
         self._db = db
 
-    # KPI: total / average of a measure, grouped by a dimension if one exists.
-    def run_kpi(self, project: Project) -> tuple[str, pd.DataFrame]:
+    # Key metrics: total / average / count of a measure, grouped by a
+    # dimension if one exists.
+    def run_key_metrics(self, project: Project) -> tuple[str, pd.DataFrame]:
         table, measure = _first_with_role(project, Role.MEASURE)
         if measure is None:
-            raise ValueError("KPI needs a column with the 'measure' role")
+            raise ValueError("Key metrics needs a column with the 'measure' role")
 
         m, t = measure.name, table.name
         dim = _dimension_in(table)

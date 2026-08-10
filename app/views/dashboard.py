@@ -5,8 +5,8 @@ Runs the unlock engine, then draws one card per standard analysis:
     table, with the generated SQL and a CSV download beside it;
   * **locked**   → a greyed card explaining why (the reason from the engine).
 
-A small filter bar drives the KPI breakdown. All SQL and aggregation happen in
-``ssa.TemplateEngine``; this view only renders what it returns.
+A small filter bar drives the key-metrics breakdown. All SQL and aggregation
+happen in ``ssa.TemplateEngine``; this view only renders what it returns.
 """
 
 import sqlglot
@@ -23,9 +23,9 @@ def _pretty_sql(sql: str) -> str:
     except Exception:
         return sql
 
-# Metric columns the KPI query always returns; anything else in front is the
+# Columns the key-metrics query always returns; anything else in front is the
 # grouping dimension.
-_KPI_METRICS = {"total", "average", "n"}
+_METRIC_COLS = {"total", "average", "n"}
 
 
 def render() -> None:
@@ -38,9 +38,9 @@ def render() -> None:
 
     results = ws.unlock.evaluate(ws.project)  # US9/US10
 
-    # Run KPI once up front so the filter bar knows the available categories.
-    kpi_sql, kpi_df, kpi_dim, kpi_error = _run_kpi(ws, results)
-    top_n, selected = _filter_bar(kpi_df, kpi_dim)
+    # Run key metrics once up front so the filter bar knows the categories.
+    m_sql, m_df, m_dim, m_error = _run_key_metrics(ws, results)
+    top_n, selected = _filter_bar(m_df, m_dim)
 
     st.divider()
     columns = st.columns(3)
@@ -49,8 +49,8 @@ def render() -> None:
             with st.container(border=True):
                 if not result.unlocked:
                     _locked_card(result)
-                elif result.template.name == "KPI":
-                    _kpi_card(kpi_sql, kpi_df, kpi_dim, kpi_error, top_n, selected)
+                elif result.template.name == "Key metrics":
+                    _metrics_card(m_sql, m_df, m_dim, m_error, top_n, selected)
                 elif result.template.name == "Cohort / retention":
                     _template_card(ws, result, ws.templates.run_cohort, _draw_cohort)
                 elif result.template.name == "RFM":
@@ -60,38 +60,38 @@ def render() -> None:
 # --------------------------------------------------------------------------- #
 # Filter bar (US13: "filterable")
 # --------------------------------------------------------------------------- #
-def _filter_bar(kpi_df, kpi_dim):
+def _filter_bar(metric_df, metric_dim):
     left, right = st.columns([1, 2])
-    top_n = left.slider("Top N (KPI breakdown)", 3, 30, 10)
+    top_n = left.slider("Top N (metric breakdown)", 3, 30, 10)
     selected = []
-    if kpi_dim and kpi_df is not None:
-        options = kpi_df[kpi_dim].astype(str).tolist()
+    if metric_dim and metric_df is not None:
+        options = metric_df[metric_dim].astype(str).tolist()
         selected = right.multiselect(
-            f"Filter categories ({kpi_dim})", options,
+            f"Filter categories ({metric_dim})", options,
             help="Leave empty to include all categories.",
         )
     else:
-        right.caption("Category filter appears once a KPI breakdown (measure + dimension) is unlocked.")
+        right.caption("Category filter appears once a metric breakdown (measure + dimension) is unlocked.")
     return top_n, selected
 
 
 # --------------------------------------------------------------------------- #
-# KPI card
+# Key metrics card
 # --------------------------------------------------------------------------- #
-def _run_kpi(ws: Workspace, results):
-    """Run KPI if unlocked; return (sql, df, dimension_or_None, error_or_None)."""
-    if not any(r.unlocked and r.template.name == "KPI" for r in results):
+def _run_key_metrics(ws: Workspace, results):
+    """Run key metrics if unlocked; return (sql, df, dimension_or_None, error_or_None)."""
+    if not any(r.unlocked and r.template.name == "Key metrics" for r in results):
         return None, None, None, None
     try:
-        sql, df = ws.templates.run_kpi(ws.project)
+        sql, df = ws.templates.run_key_metrics(ws.project)
     except Exception as exc:  # keep the dashboard rendering if one query fails
         return None, None, None, str(exc)
-    dim = next((c for c in df.columns if c not in _KPI_METRICS), None)
+    dim = next((c for c in df.columns if c not in _METRIC_COLS), None)
     return sql, df, dim, None
 
 
-def _kpi_card(sql, df, dim, error, top_n, selected):
-    st.markdown("**KPI**  🔓")
+def _metrics_card(sql, df, dim, error, top_n, selected):
+    st.markdown("**Key metrics**  🔓")
     if error:
         st.error(error)
         return
@@ -101,7 +101,7 @@ def _kpi_card(sql, df, dim, error, top_n, selected):
         if selected:
             view = view[view[dim].astype(str).isin(selected)]
         view = view.nlargest(top_n, "total")
-        st.plotly_chart(charts.kpi_bar(view, dim), width="stretch")
+        st.plotly_chart(charts.metric_bar(view, dim), width="stretch")
     else:
         row = df.iloc[0]
         c1, c2, c3 = st.columns(3)
@@ -110,7 +110,7 @@ def _kpi_card(sql, df, dim, error, top_n, selected):
         c3.metric("Rows", f"{int(row['n']):,}")
         st.caption("Assign a **dimension** role to a column to see a breakdown.")
 
-    _sql_and_download(sql, df, "kpi")
+    _sql_and_download(sql, df, "metrics")
 
 
 # --------------------------------------------------------------------------- #

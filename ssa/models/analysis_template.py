@@ -14,8 +14,8 @@ class AnalysisTemplate:
 # The standard analyses the tool ships with.
 STANDARD_TEMPLATES = [
     AnalysisTemplate(
-        "KPI", frozenset({Role.MEASURE}),
-        "Totals and averages of a measure (e.g. sales, average order value)."),
+        "Key metrics", frozenset({Role.MEASURE}),
+        "Totals, averages and counts of a measure (e.g. total sales, average order value)."),
     AnalysisTemplate(
         "Cohort / retention", frozenset({Role.IDENTIFIER, Role.DATE}),
         "How groups of entities keep coming back over time."),
