@@ -177,8 +177,6 @@ def _step_clean(ws: Workspace) -> None:
 
     cleaned, actions = ws.cleaner.apply(df, approved)
     st.session_state.wiz_cleaned = cleaned
-    if actions:
-        st.success("On the next step we'll " + " and ".join(actions) + ".")
 
     st.divider()
     back, forward = st.columns(2)
