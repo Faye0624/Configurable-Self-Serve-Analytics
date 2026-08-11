@@ -44,12 +44,40 @@ def _go_to_step(step: int) -> None:
 
 
 def _scroll_to_top_if_requested() -> None:
-    if st.session_state.pop("scroll_to_top", False):
-        components.html(
-            "<script>window.parent.document."
-            "querySelector('section.main').scrollTo({top: 0});</script>",
-            height=0,
-        )
+    """Scroll the page back to the top after a step change.
+
+    Streamlit has no API for this and renames its layout containers between
+    versions, so we try the known selectors and then fall back to whatever
+    element is actually scrolled. It runs a few times because the new step is
+    still rendering when the script first fires.
+    """
+    if not st.session_state.pop("scroll_to_top", False):
+        return
+    components.html(
+        """
+        <script>
+        const toTop = () => {
+            const doc = window.parent.document;
+            const known = ['[data-testid="stMain"]', 'section.stMain',
+                           'section.main', '.stMainBlockContainer',
+                           '[data-testid="stAppViewContainer"]'];
+            known.forEach(sel => {
+                const el = doc.querySelector(sel);
+                if (el) el.scrollTop = 0;
+            });
+            // fallback: anything that is currently scrolled down
+            doc.querySelectorAll('div, section').forEach(el => {
+                if (el.scrollTop > 0) el.scrollTop = 0;
+            });
+            if (doc.scrollingElement) doc.scrollingElement.scrollTop = 0;
+            window.parent.scrollTo(0, 0);
+        };
+        toTop();
+        [30, 120, 300, 600].forEach(ms => setTimeout(toTop, ms));
+        </script>
+        """,
+        height=0,
+    )
 
 
 def render() -> None:
@@ -112,7 +140,7 @@ def _step_clean(ws: Workspace) -> None:
     # --- what we found, with the offending rows shown --------------------- #
     st.markdown("### Data quality check")
     if options:
-        st.caption("We found the following in your file. Nothing has been changed.")
+        st.caption("We found the following in your file.")
         for opt in options:
             with st.container(border=True):
                 st.markdown(f"**{opt.label}**")
