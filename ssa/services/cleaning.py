@@ -113,11 +113,11 @@ class CleaningService:
 
             null_pct = round(float(s.isna().mean()) * 100, 1) if n else 0.0
             if null_pct >= self.MISSING_THRESHOLD:
-                issues.append(f"'{c}': {null_pct}% missing")
+                issues.append(f"{c} — {null_pct}% of values are missing")
 
             # Object column holding more than one Python type (e.g. numbers + text).
             if s.dtype == object and s.dropna().map(type).nunique() > 1:
-                issues.append(f"'{c}': mixed value types")
+                issues.append(f"{c} — mixed data types in the same column")
 
             # Numeric values far outside the interquartile range.
             if pd.api.types.is_numeric_dtype(s):
@@ -130,5 +130,8 @@ class CleaningService:
                         hi = q3 + self.OUTLIER_WHISKER * iqr
                         n_out = int(((vals < lo) | (vals > hi)).sum())
                         if n_out:
-                            issues.append(f"'{c}': {n_out} possible outlier(s)")
+                            issues.append(
+                                f"{c} — {n_out} "
+                                f"{'value' if n_out == 1 else 'values'} fall far "
+                                "outside the typical range (possible outliers)")
         return issues

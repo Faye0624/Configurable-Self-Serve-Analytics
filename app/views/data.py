@@ -152,8 +152,9 @@ def _step_clean(ws: Workspace) -> None:
 
     if issues:
         with st.container(border=True):
-            st.markdown("**Worth a look**")
-            st.caption("We can't fix these automatically — please check them yourself.")
+            st.markdown("**Potential data quality issues**")
+            st.caption("Flagged for your review — these require domain knowledge, "
+                       "so they are not fixed automatically.")
             for issue in issues:
                 st.warning(issue)
 

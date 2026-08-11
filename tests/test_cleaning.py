@@ -79,7 +79,7 @@ def test_flags_high_missing_column(cleaner):
 
 def test_flags_mixed_types(cleaner):
     df = pd.DataFrame({"a": [1, "two", 3, "four"]})
-    assert any("mixed value types" in i for i in cleaner.flag_suspicious(df))
+    assert any("mixed data types" in i for i in cleaner.flag_suspicious(df))
 
 
 def test_does_not_flag_normal_data(cleaner):
