@@ -3,9 +3,9 @@
 Run locally from the repo root with:
     streamlit run app/main.py
 
-The sidebar routes between four screens — Projects, Data, Dashboard, Ask —
-each implemented in ``app/views``. This file only does navigation; every screen
-is a thin UI layer over the ``ssa`` services (see ``app/state.py``).
+Routing has three levels: sign in, pick a project, then work inside it
+(Data / Dashboard / Ask). Every screen lives in ``app/views`` and is a thin UI
+layer over the ``ssa`` services (see ``app/state.py``).
 """
 
 import os
@@ -18,34 +18,56 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import streamlit as st
 
-from state import get_workspace
-from views import ask, dashboard, data, projects
+from state import current_user, get_workspace, sign_out
+from views import ask, auth, dashboard, data, projects
 
 # Page-level config must be the first Streamlit call.
 st.set_page_config(page_title="Self-Serve Analytics", layout="wide")
 
-# Screen name -> render function.
-SCREENS = {
-    "Projects": projects.render,
+# Screens available once a project is open.
+PROJECT_SCREENS = {
     "Data": data.render,
     "Dashboard": dashboard.render,
     "Ask": ask.render,
 }
 
 
-def render_sidebar() -> str:
+def render_sidebar(workspace) -> str:
     """Draw the left navigation and return the chosen screen."""
-    ws = get_workspace()
     st.sidebar.title("Self-Serve Analytics")
     st.sidebar.caption("configurable · transparent · self-hostable")
     st.sidebar.divider()
-    st.sidebar.write(f"**Project:** {ws.project.name}")
-    st.sidebar.caption(f"{len(ws.project.tables)} table(s) loaded")
-    return st.sidebar.radio("Navigate", list(SCREENS), index=1)  # default: Data
+
+    user = current_user()
+    st.sidebar.write(f"Signed in as **{user.username}**")
+    if st.sidebar.button("Sign out"):
+        sign_out()
+        st.rerun()
+    st.sidebar.divider()
+
+    if workspace is None:
+        return "Projects"
+
+    st.sidebar.write(f"**Project:** {workspace.project.name}")
+    tables = len(workspace.project.tables)
+    st.sidebar.caption(f"{tables} table{'' if tables == 1 else 's'} loaded")
+    choice = st.sidebar.radio("Navigate", ["Projects", *PROJECT_SCREENS], index=1)
+    return choice
 
 
 def main() -> None:
-    SCREENS[render_sidebar()]()
+    # 1. not signed in -> the only screen is sign in / register
+    if current_user() is None:
+        auth.render()
+        return
+
+    # 2. signed in -> pick a project, then work inside it
+    workspace = get_workspace()
+    screen = render_sidebar(workspace)
+    if workspace is None or screen == "Projects":
+        projects.render()
+        return
+    PROJECT_SCREENS[screen]()
 
 
 if __name__ == "__main__":

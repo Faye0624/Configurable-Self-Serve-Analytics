@@ -16,8 +16,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from ssa.models import Role
-from ssa.services import safe_table_name, save_project
-from state import Workspace, get_workspace
+from ssa.services import safe_table_name
+from state import Workspace, get_workspace, save_current_project
 
 # Order shown in the role dropdown.
 ROLE_OPTIONS = [
@@ -92,7 +92,7 @@ def render() -> None:
         _uploaded_tables(ws)
 
     # Persist the project config after any change so it survives a restart.
-    save_project(ws.db, ws.project)
+    save_current_project()
 
 
 # --------------------------------------------------------------------------- #

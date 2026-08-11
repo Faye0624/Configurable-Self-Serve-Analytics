@@ -7,7 +7,8 @@ from ssa.services.unlock_engine import UnlockEngine, UnlockResult
 from ssa.services.template_engine import TemplateEngine
 from ssa.services.sql_guard import SqlGuard, SqlGuardError
 from ssa.services.nl_query import NLQueryEngine, QueryResult, HistoryEntry
-from ssa.services.persistence import save_project, load_project
+from ssa.services.project_store import ProjectStore
+from ssa.services.auth import AuthService, AuthError
 
 __all__ = [
     "DataRegistry",
@@ -24,6 +25,7 @@ __all__ = [
     "NLQueryEngine",
     "QueryResult",
     "HistoryEntry",
-    "save_project",
-    "load_project",
+    "ProjectStore",
+    "AuthService",
+    "AuthError",
 ]

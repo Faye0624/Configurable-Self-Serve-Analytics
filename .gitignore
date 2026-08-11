@@ -14,6 +14,7 @@ env/
 # --- Data & database artifacts (don't commit uploaded data or the DB file) ---
 *.duckdb
 *.duckdb.wal
+projects/          # per-project databases created at runtime
 data/uploads/
 
 # --- OS / IDE ---
