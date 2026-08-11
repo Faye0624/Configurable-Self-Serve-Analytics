@@ -88,33 +88,49 @@ def _step_clean(ws: Workspace) -> None:
     options = ws.cleaner.detect(df)          # detect only — nothing is changed
     issues = ws.cleaner.flag_suspicious(df)
 
-    st.markdown("**Optional clean-up — nothing is changed unless you choose it**")
-    approved: set[str] = set()
+    # --- what we found, with the offending rows shown --------------------- #
+    st.markdown("### What we found")
     if options:
         for opt in options:
-            if st.checkbox(f"{opt.label} — {opt.detail}", key=f"clean_{opt.key}"):
-                approved.add(opt.key)
+            with st.container(border=True):
+                st.markdown(f"**{opt.label}**")
+                st.caption(opt.detail)
+                if opt.rows is not None and not opt.rows.empty:
+                    st.dataframe(opt.rows, width="stretch", hide_index=True)
     else:
-        st.caption("Nothing to clean: no stray whitespace or duplicate rows found.")
+        st.success("No stray whitespace or duplicate rows found.")
 
-    st.markdown("**Flagged for your review**")
     if issues:
-        for issue in issues:
-            st.warning(issue)
-        st.caption("These are reported for you to judge — the tool never changes "
-                   "them automatically. AI-assisted fix suggestions may appear "
-                   "here later (part of US5).")
-    else:
-        st.caption("No suspicious columns detected.")
+        with st.container(border=True):
+            st.markdown("**Other things worth a look** (reported only, never changed)")
+            for issue in issues:
+                st.warning(issue)
+            st.caption("AI-assisted fix suggestions may appear here later (part of US5).")
 
-    # Apply the chosen fixes (if none are ticked the data passes through as-is).
+    # --- ask whether to clean --------------------------------------------- #
+    approved: set[str] = set()
+    if options:
+        st.markdown("### Clean the data before configuring?")
+        choice = st.radio(
+            "Clean the data before configuring?",
+            ["Yes — apply the fixes above", "No — keep the data exactly as uploaded"],
+            index=1, key="clean_choice", label_visibility="collapsed",
+        )
+        if choice.startswith("Yes"):
+            picked = st.multiselect(
+                "Fixes to apply",
+                [o.key for o in options],
+                default=[o.key for o in options],
+                format_func=lambda k: next(o.label for o in options if o.key == k),
+            )
+            approved = set(picked)
+
     cleaned, actions = ws.cleaner.apply(df, approved)
     st.session_state.wiz_cleaned = cleaned
     if actions:
         st.success("Will be applied: " + "; ".join(actions))
-    else:
-        st.info("No changes selected — the data will be stored exactly as uploaded.")
 
+    st.divider()
     back, forward = st.columns(2)
     if back.button("← Back"):
         st.session_state.wiz_step = 1

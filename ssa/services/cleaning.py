@@ -14,11 +14,12 @@ import pandas as pd
 
 @dataclass(frozen=True)
 class CleaningOption:
-    """One fix the user can choose to apply."""
+    """One fix the user can choose to apply, with evidence of what it affects."""
 
     key: str          # stable id, e.g. "trim_whitespace"
     label: str        # what it does, in plain words
     detail: str       # how much it would affect ("3 column(s)", "1 row(s)")
+    rows: pd.DataFrame | None = None  # the actual offending rows, for review
 
 
 # Fix identifiers, so UI and service agree without magic strings.
@@ -31,25 +32,49 @@ class CleaningService:
     OUTLIER_WHISKER = 1.5     # IQR multiplier for outlier fences
 
     # --- 1. detect: what *could* be cleaned (changes nothing) --------------- #
+    # Each option carries the offending rows so the user can see the evidence
+    # before deciding, rather than trusting a count.
+    MAX_EVIDENCE_ROWS = 50
+
     def detect(self, df: pd.DataFrame) -> list[CleaningOption]:
         options: list[CleaningOption] = []
 
+        # --- stray whitespace: which rows, in which columns ---------------- #
         text_cols = df.select_dtypes(include="object").columns
-        affected = [c for c in text_cols
-                    if df[c].map(lambda v: isinstance(v, str) and v != v.strip()).any()]
-        if affected:
+        padded = pd.DataFrame(
+            {c: df[c].map(lambda v: isinstance(v, str) and v != v.strip())
+             for c in text_cols},
+            index=df.index,
+        )
+        affected_cols = [c for c in text_cols if padded[c].any()] if len(text_cols) else []
+        if affected_cols:
+            mask = padded[affected_cols].any(axis=1)
+            evidence = df.loc[mask, affected_cols].head(self.MAX_EVIDENCE_ROWS).copy()
+            # show the padding explicitly, otherwise it is invisible in a table
+            for c in affected_cols:
+                evidence[c] = evidence[c].map(
+                    lambda v: f"[{v}]" if isinstance(v, str) else v)
+            evidence.insert(0, "row", evidence.index)
             options.append(CleaningOption(
                 TRIM_WHITESPACE,
                 "Trim leading/trailing spaces in text values",
-                f"{len(affected)} column(s): " + ", ".join(f"'{c}'" for c in affected),
+                f"{int(mask.sum())} row(s) across {len(affected_cols)} column(s): "
+                + ", ".join(f"'{c}'" for c in affected_cols),
+                evidence.reset_index(drop=True),
             ))
 
-        duplicates = int(df.duplicated().sum())
-        if duplicates:
+        # --- exact duplicate rows: show every copy, grouped ---------------- #
+        dup_mask = df.duplicated(keep=False)     # keep=False -> flags all copies
+        removable = int(df.duplicated().sum())   # how many would actually go
+        if removable:
+            evidence = df.loc[dup_mask].head(self.MAX_EVIDENCE_ROWS).copy()
+            evidence.insert(0, "row", evidence.index)
             options.append(CleaningOption(
                 DROP_DUPLICATES,
                 "Remove exact duplicate rows",
-                f"{duplicates} row(s)",
+                f"{removable} row(s) would be removed "
+                f"({int(dup_mask.sum())} row(s) involved)",
+                evidence.reset_index(drop=True),
             ))
 
         return options
