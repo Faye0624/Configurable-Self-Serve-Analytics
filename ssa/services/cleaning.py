@@ -55,11 +55,13 @@ class CleaningService:
                 evidence[c] = evidence[c].map(
                     lambda v: f"[{v}]" if isinstance(v, str) else v)
             evidence.insert(0, "row", evidence.index)
+            n_rows = int(mask.sum())
             options.append(CleaningOption(
                 TRIM_WHITESPACE,
-                "Trim leading/trailing spaces in text values",
-                f"{int(mask.sum())} row(s) across {len(affected_cols)} column(s): "
-                + ", ".join(f"'{c}'" for c in affected_cols),
+                "Extra spaces around text",
+                f"{n_rows} {'value' if n_rows == 1 else 'values'} in "
+                + ", ".join(affected_cols)
+                + " start or end with a space. Spaces are shown as [ ] below.",
                 evidence.reset_index(drop=True),
             ))
 
@@ -71,9 +73,10 @@ class CleaningService:
             evidence.insert(0, "row", evidence.index)
             options.append(CleaningOption(
                 DROP_DUPLICATES,
-                "Remove exact duplicate rows",
-                f"{removable} row(s) would be removed "
-                f"({int(dup_mask.sum())} row(s) involved)",
+                "Duplicate rows",
+                f"{int(dup_mask.sum())} rows are identical copies. "
+                f"Keeping one of each would remove {removable} "
+                f"{'row' if removable == 1 else 'rows'}.",
                 evidence.reset_index(drop=True),
             ))
 
@@ -89,14 +92,15 @@ class CleaningService:
             text_cols = df.select_dtypes(include="object").columns
             for c in text_cols:
                 df[c] = df[c].map(lambda v: v.strip() if isinstance(v, str) else v)
-            actions.append(f"trimmed whitespace on {len(text_cols)} text column(s)")
+            actions.append("removed extra spaces around text values")
 
         if DROP_DUPLICATES in approved:
             before = len(df)
             df = df.drop_duplicates(ignore_index=True)
             removed = before - len(df)
             if removed:
-                actions.append(f"removed {removed} duplicate row(s)")
+                actions.append(f"removed {removed} duplicate "
+                               f"{'row' if removed == 1 else 'rows'}")
 
         return df, actions
 

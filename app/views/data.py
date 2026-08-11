@@ -13,6 +13,7 @@ all happen inside ``ssa``.
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from ssa.models import Role
 from ssa.services import safe_table_name, save_project
@@ -29,6 +30,26 @@ ROLE_OPTIONS = [
 
 # Wizard keys kept in session_state, cleared when a table is finished.
 _WIZ_KEYS = ["wiz_step", "wiz_df", "wiz_name", "wiz_source", "wiz_cleaned", "wiz_stored"]
+
+
+def _go_to_step(step: int) -> None:
+    """Move the wizard to a step and scroll back to the top of the page.
+
+    Streamlit keeps the scroll position across reruns, which would otherwise
+    drop the user halfway down the next step.
+    """
+    st.session_state.wiz_step = step
+    st.session_state.scroll_to_top = True
+    st.rerun()
+
+
+def _scroll_to_top_if_requested() -> None:
+    if st.session_state.pop("scroll_to_top", False):
+        components.html(
+            "<script>window.parent.document."
+            "querySelector('section.main').scrollTo({top: 0});</script>",
+            height=0,
+        )
 
 
 def render() -> None:
@@ -50,6 +71,7 @@ def render() -> None:
 # Upload wizard
 # --------------------------------------------------------------------------- #
 def _wizard(ws: Workspace) -> None:
+    _scroll_to_top_if_requested()
     step = st.session_state.get("wiz_step", 1)
     labels = ["1. Upload", "2. Clean", "3. Configure"]
     st.caption("  →  ".join(f"**{l}**" if i + 1 == step else l
@@ -74,8 +96,7 @@ def _step_upload(ws: Workspace) -> None:
     )
     st.dataframe(df.head(20), width="stretch")
     if st.button("Next: Clean →", type="primary"):
-        st.session_state.wiz_step = 2
-        st.rerun()
+        _go_to_step(2)
 
 
 def _step_clean(ws: Workspace) -> None:
@@ -89,8 +110,9 @@ def _step_clean(ws: Workspace) -> None:
     issues = ws.cleaner.flag_suspicious(df)
 
     # --- what we found, with the offending rows shown --------------------- #
-    st.markdown("### What we found")
+    st.markdown("### Data quality check")
     if options:
+        st.caption("We found the following in your file. Nothing has been changed.")
         for opt in options:
             with st.container(border=True):
                 st.markdown(f"**{opt.label}**")
@@ -98,27 +120,27 @@ def _step_clean(ws: Workspace) -> None:
                 if opt.rows is not None and not opt.rows.empty:
                     st.dataframe(opt.rows, width="stretch", hide_index=True)
     else:
-        st.success("No stray whitespace or duplicate rows found.")
+        st.success("Your data looks clean — no extra spaces or duplicate rows found.")
 
     if issues:
         with st.container(border=True):
-            st.markdown("**Other things worth a look** (reported only, never changed)")
+            st.markdown("**Worth a look**")
+            st.caption("We can't fix these automatically — please check them yourself.")
             for issue in issues:
                 st.warning(issue)
-            st.caption("AI-assisted fix suggestions may appear here later (part of US5).")
 
     # --- ask whether to clean --------------------------------------------- #
     approved: set[str] = set()
     if options:
-        st.markdown("### Clean the data before configuring?")
+        st.markdown("### Clean the data before you configure it?")
         choice = st.radio(
-            "Clean the data before configuring?",
-            ["Yes — apply the fixes above", "No — keep the data exactly as uploaded"],
-            index=1, key="clean_choice", label_visibility="collapsed",
+            "Clean the data before you configure it?",
+            ["No, use my data as it is", "Yes, clean it"],
+            index=0, key="clean_choice", label_visibility="collapsed",
         )
         if choice.startswith("Yes"):
             picked = st.multiselect(
-                "Fixes to apply",
+                "What to fix",
                 [o.key for o in options],
                 default=[o.key for o in options],
                 format_func=lambda k: next(o.label for o in options if o.key == k),
@@ -128,16 +150,14 @@ def _step_clean(ws: Workspace) -> None:
     cleaned, actions = ws.cleaner.apply(df, approved)
     st.session_state.wiz_cleaned = cleaned
     if actions:
-        st.success("Will be applied: " + "; ".join(actions))
+        st.success("On the next step we'll " + " and ".join(actions) + ".")
 
     st.divider()
     back, forward = st.columns(2)
     if back.button("← Back"):
-        st.session_state.wiz_step = 1
-        st.rerun()
+        _go_to_step(1)
     if forward.button("Next: Configure →", type="primary"):
-        st.session_state.wiz_step = 3
-        st.rerun()
+        _go_to_step(3)
 
 
 def _step_configure(ws: Workspace) -> None:
@@ -164,8 +184,7 @@ def _step_configure(ws: Workspace) -> None:
 
     back, done = st.columns(2)
     if back.button("← Back", key="cfg_back"):
-        st.session_state.wiz_step = 2
-        st.rerun()
+        _go_to_step(2)
     if done.button("Save & finish", type="primary"):
         for key in _WIZ_KEYS:
             st.session_state.pop(key, None)

@@ -54,7 +54,7 @@ def test_apply_trim_only_trims(cleaner, messy_df):
     result, actions = cleaner.apply(messy_df, {TRIM_WHITESPACE})
     assert result["category"].tolist() == ["books", "toys", "garden", "books"]
     assert len(result) == len(messy_df)          # duplicates NOT removed
-    assert any("whitespace" in a for a in actions)
+    assert any("spaces" in a for a in actions)
 
 
 def test_apply_dedupe_only_removes_duplicates(cleaner, messy_df):
