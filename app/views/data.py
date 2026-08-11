@@ -79,31 +79,41 @@ def _step_upload(ws: Workspace) -> None:
 
 
 def _step_clean(ws: Workspace) -> None:
+    """Cleaning is opt-in: show what could be fixed, apply only what's ticked."""
     df = st.session_state.get("wiz_df")
     if df is None:
         st.info("Upload a file in step 1 first.")
         return
 
-    cleaned, actions = ws.cleaner.clean(df)
+    options = ws.cleaner.detect(df)          # detect only — nothing is changed
     issues = ws.cleaner.flag_suspicious(df)
-    st.session_state.wiz_cleaned = cleaned
 
-    st.markdown("**Auto-clean applied**")
-    if actions:
-        for action in actions:
-            st.write(f"• {action}")
+    st.markdown("**Optional clean-up — nothing is changed unless you choose it**")
+    approved: set[str] = set()
+    if options:
+        for opt in options:
+            if st.checkbox(f"{opt.label} — {opt.detail}", key=f"clean_{opt.key}"):
+                approved.add(opt.key)
     else:
-        st.caption("No automatic fixes were necessary.")
+        st.caption("Nothing to clean: no stray whitespace or duplicate rows found.")
 
     st.markdown("**Flagged for your review**")
     if issues:
         for issue in issues:
             st.warning(issue)
-        st.caption("The LLM API isn't wired in yet — AI-assisted fix suggestions "
-                   "may appear here later (part of US5). For now these issues are "
-                   "surfaced for you to review.")
+        st.caption("These are reported for you to judge — the tool never changes "
+                   "them automatically. AI-assisted fix suggestions may appear "
+                   "here later (part of US5).")
     else:
         st.caption("No suspicious columns detected.")
+
+    # Apply the chosen fixes (if none are ticked the data passes through as-is).
+    cleaned, actions = ws.cleaner.apply(df, approved)
+    st.session_state.wiz_cleaned = cleaned
+    if actions:
+        st.success("Will be applied: " + "; ".join(actions))
+    else:
+        st.info("No changes selected — the data will be stored exactly as uploaded.")
 
     back, forward = st.columns(2)
     if back.button("← Back"):
