@@ -123,6 +123,87 @@ def test_rfm_needs_all_three_roles(engine, db, orders_df):
         engine.run_rfm(Project("p", [table]))
 
 
+# --- roles spread across joined tables (US11) --------------------------------- #
+@pytest.fixture
+def split_project(db, orders_df):
+    """The same data as two tables joined on order_id — the shape you get when
+    data arrives piece by piece: orders (who/when) + items (what/how much)."""
+    import pandas as pd
+
+    from ssa.services import DataRegistry, SemanticConfigService
+
+    registry, config = DataRegistry(db), SemanticConfigService()
+
+    orders = registry.add_dataframe(
+        "orders", orders_df[["order_id", "customer_id", "order_date"]])
+    config.set_role(orders, "customer_id", Role.IDENTIFIER)
+    config.set_role(orders, "order_date", Role.DATE)
+    config.set_join_key(orders, "order_id")
+
+    # two line items on order 1, so the join fans out and can inflate counts
+    lines = pd.DataFrame({
+        "order_id": [1, 1, 2, 3, 4],
+        "product_category": ["books", "books", "toys", "books", "garden"],
+        "price": [4.0, 6.0, 20.0, 30.0, 40.0],      # order 1 still totals 10.0
+    })
+    items = registry.add_dataframe("order_items", lines)
+    config.set_role(items, "price", Role.MEASURE)
+    config.set_role(items, "product_category", Role.DIMENSION)
+    config.set_join_key(items, "order_id")
+
+    return Project("split", [orders, items])
+
+
+def test_key_metrics_only_joins_when_it_has_to(engine, split_project):
+    """Measure and dimension both live in the items table, so no join is needed."""
+    sql, result = engine.run_key_metrics(split_project)
+    totals = dict(zip(result["product_category"], result["total"]))
+
+    assert "JOIN" not in sql
+    assert totals["books"] == 40.0        # 4 + 6 (order 1) + 30 (order 3)
+    assert totals["garden"] == 40.0
+
+
+def test_rfm_works_across_two_tables(engine, split_project):
+    sql, result = engine.run_rfm(split_project)
+    by_entity = {row.entity: row for row in result.itertuples()}
+
+    assert "JOIN" in sql
+    assert by_entity["c1"].monetary == 30.0        # 10 (two lines) + 20
+
+
+def test_rfm_counts_orders_not_joined_rows(engine, split_project):
+    """A join repeats an order once per line; frequency must not inflate."""
+    _, result = engine.run_rfm(split_project)
+    by_entity = {row.entity: row for row in result.itertuples()}
+
+    assert by_entity["c1"].frequency == 2   # two orders, three line items
+    assert by_entity["c2"].frequency == 1
+
+
+def test_cohort_works_across_two_tables(engine, split_project):
+    _, result = engine.run_cohort(split_project)
+    assert not result.empty
+
+
+def test_unjoinable_tables_give_a_helpful_error(engine, db, orders_df):
+    """Roles exist but no shared key: say so instead of failing obscurely."""
+    import pandas as pd
+
+    from ssa.services import DataRegistry, SemanticConfigService
+
+    registry, config = DataRegistry(db), SemanticConfigService()
+    orders = registry.add_dataframe("orders", orders_df[["customer_id", "order_date"]])
+    config.set_role(orders, "customer_id", Role.IDENTIFIER)
+    config.set_role(orders, "order_date", Role.DATE)
+
+    money = registry.add_dataframe("money", pd.DataFrame({"amount": [1.0, 2.0]}))
+    config.set_role(money, "amount", Role.MEASURE)
+
+    with pytest.raises(ValueError, match="join key"):
+        engine.run_rfm(Project("split", [orders, money]))
+
+
 # --- transparency: every template hands back its SQL (US16) ------------------- #
 @pytest.mark.parametrize("run", ["run_key_metrics", "run_cohort", "run_rfm"])
 def test_templates_return_the_sql_they_ran(engine, configured_project, run):
