@@ -32,6 +32,7 @@ from ssa.services import (
     SemanticConfigService,
     TemplateEngine,
     UnlockEngine,
+    UsageLimiter,
 )
 
 CATALOGUE_DB = "workspace.duckdb"   # accounts + project list
@@ -70,6 +71,17 @@ def get_store() -> ProjectStore:
     if "store" not in st.session_state:
         st.session_state.store = ProjectStore(get_catalogue(), PROJECT_DIR)
     return st.session_state.store
+
+
+def get_limiter() -> UsageLimiter:
+    """Caps model calls per day — a deployed app shares one API key."""
+    if "limiter" not in st.session_state:
+        try:
+            limit = int(st.secrets.get("SSA_DAILY_LLM_LIMIT", 100))
+        except Exception:
+            limit = 100
+        st.session_state.limiter = UsageLimiter(get_catalogue(), daily_limit=limit)
+    return st.session_state.limiter
 
 
 # --- signed-in user --------------------------------------------------------- #
@@ -129,7 +141,8 @@ def get_workspace() -> Workspace | None:
         config=SemanticConfigService(),
         unlock=UnlockEngine(),
         templates=TemplateEngine(db),
-        nl=NLQueryEngine(db, build_default_client(), history_db=db),
+        nl=NLQueryEngine(db, build_default_client(), history_db=db,
+                         limiter=get_limiter()),
     )
     return st.session_state.workspace
 

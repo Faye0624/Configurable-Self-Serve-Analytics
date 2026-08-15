@@ -51,10 +51,13 @@ class NLQueryEngine:
     MAX_ROWS = 5000  # cap returned rows so a broad query can't flood the UI
 
     def __init__(self, db: Database, llm: LLMClient, guard: SqlGuard | None = None,
-                 history_db: Database | None = None):
+                 history_db: Database | None = None, limiter=None):
         self._db = db
         self._llm = llm
         self._guard = guard or SqlGuard()
+        # Optional cap on model calls, used by a deployed instance where one
+        # API key is shared by everyone who signs up.
+        self._limiter = limiter
         # Optional durable store for the query log (US22). When given, history
         # survives restarts; when None, it lives only in memory for this session.
         self._history_db = history_db
@@ -75,10 +78,19 @@ class NLQueryEngine:
     # US15/US16: answer a natural-language question.
     def ask(self, project, question: str) -> QueryResult:
         schema = build_schema(project)
+
+        if self._limiter is not None:
+            try:
+                self._limiter.check()
+            except Exception as exc:
+                return QueryResult(question, error=str(exc))
+
         try:
             raw_sql = self._llm.generate_sql(question, schema)
         except Exception as exc:
             return QueryResult(question, error=f"the model could not produce SQL: {exc}")
+        if self._limiter is not None:
+            self._limiter.record()
 
         try:
             safe_sql = self._guard.validate(raw_sql, schema.table_names())

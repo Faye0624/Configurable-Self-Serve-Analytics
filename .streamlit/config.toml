@@ -1,0 +1,13 @@
+# Streamlit settings applied both locally and when deployed.
+
+[server]
+# Uploaded files are small CSVs; keep the cap low so a stray large file can't
+# exhaust a small hosted instance.
+maxUploadSize = 25
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#4C6FFF"          # matches the chart colour

@@ -9,6 +9,7 @@ from ssa.services.sql_guard import SqlGuard, SqlGuardError
 from ssa.services.nl_query import NLQueryEngine, QueryResult, HistoryEntry
 from ssa.services.project_store import ProjectStore
 from ssa.services.auth import AuthService, AuthError
+from ssa.services.usage_limit import UsageLimiter, DailyLimitReached
 
 __all__ = [
     "DataRegistry",
@@ -28,4 +29,6 @@ __all__ = [
     "ProjectStore",
     "AuthService",
     "AuthError",
+    "UsageLimiter",
+    "DailyLimitReached",
 ]
