@@ -100,7 +100,7 @@ function play() {{
 // The card fades in with the buttons; typing starts once it is on screen,
 // otherwise the whole animation would play behind a transparent iframe.
 card.classList.add('on');
-setTimeout(play, 2000);
+setTimeout(play, 2200);
 </script>
 """
 

@@ -82,7 +82,8 @@ h1, h2, .hero-title {{
 # make the whole product feel broken.
 _LANDING_MOTION = """
 <style>
-/* The title lands first, then the tags above it, then the line beneath. */
+/* One line at a time down the left column: title, then the tags above it,
+   then the slogan beneath. Each takes .85s, so the last lands at 2.0s. */
 .hero-title  { animation-delay: .15s; }
 .hero-tags   { animation-delay: .70s; }
 .hero-slogan { animation-delay: 1.15s; }
@@ -92,19 +93,19 @@ _LANDING_MOTION = """
     animation: rise .85s cubic-bezier(.22, .61, .36, 1) forwards;
 }
 
-/* The example arrives once the copy has settled... */
-iframe { animation-delay: 1.7s; }
+/* The example picks up the moment the copy finishes. */
+iframe { animation-delay: 2.0s; }
 
-/* ...and once it has played through, the page lifts to make room and the two
-   ways in appear, so the demonstration is watched before a decision is asked
-   for. Shrinking the top spacer is what pulls everything upward. */
+/* The demonstration runs to about 5.3s. After a half-second pause the page
+   lifts to make room, and the two ways in follow — so the product is shown
+   before a decision is asked for. Shrinking the top spacer pulls it upward. */
 @keyframes lift {
     to { height: clamp(1rem, 4vh, 2.5rem); }
 }
 .hero-lead {
-    animation: lift .9s cubic-bezier(.22, .61, .36, 1) 4.3s forwards;
+    animation: lift .9s cubic-bezier(.22, .61, .36, 1) 5.8s forwards;
 }
-.stButton { animation-delay: 4.9s; }
+.stButton { animation-delay: 6.0s; }
 
 /* Larger, calmer buttons — they are the page's only call to action. */
 .stButton > button {
