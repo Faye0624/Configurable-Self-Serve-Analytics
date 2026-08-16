@@ -21,24 +21,26 @@ html, body, [class*="st-"], button, input, textarea, select {{
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
 }}
 
-/* Display type: only for the landing hero and page titles. */
+/* Display type. Streamlit's own heading styles are more specific, so these
+   need !important to win. */
 h1, h2, .hero-title {{
-    font-family: 'Fraunces', Georgia, serif;
-    font-weight: 500;
+    font-family: 'Fraunces', Georgia, serif !important;
+    font-weight: 500 !important;
     letter-spacing: -0.02em;
 }}
 
 .hero-title {{
-    font-size: clamp(2.4rem, 5.2vw, 3.6rem);
-    line-height: 1.04;
+    font-size: clamp(3rem, 6.4vw, 4.6rem) !important;
+    line-height: 1.02;
     color: #F5F2EC;
-    margin: 0.6rem 0 0;
+    margin: 1.1rem 0 0;
 }}
 
 .hero-slogan {{
-    font-size: 1.05rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.15rem;
     color: #A79F90;
-    margin: 0.9rem 0 0;
+    margin: 1.4rem 0 0;
 }}
 
 .hero-tags {{
@@ -58,8 +60,10 @@ h1, h2, .hero-title {{
     white-space: nowrap;
 }}
 
-/* Give the hero room to breathe. */
-.hero-spacer {{ height: 1.6rem; }}
+/* Give the hero room to breathe: drop it down the page and space it out, so
+   it reads as a landing page rather than a form at the top of a screen. */
+.hero-lead {{ height: clamp(3rem, 12vh, 8rem); }}
+.hero-spacer {{ height: 2.6rem; }}
 
 @keyframes rise {{
     from {{ opacity: 0; transform: translateY(12px); }}
@@ -77,15 +81,16 @@ _LANDING_MOTION = """
     opacity: 0;
     animation: rise .85s cubic-bezier(.22, .61, .36, 1) forwards;
 }
-.hero-tags   { animation-delay: .10s; }
-.hero-title  { animation-delay: .55s; }
-.hero-slogan { animation-delay: 1.00s; }
+/* The title lands first, then the tags above it, then the line beneath. */
+.hero-title  { animation-delay: .15s; }
+.hero-tags   { animation-delay: .70s; }
+.hero-slogan { animation-delay: 1.15s; }
 
 /* The buttons and the worked example arrive together, once the copy has settled. */
 .stButton, iframe {
     opacity: 0;
     animation: rise .85s cubic-bezier(.22, .61, .36, 1) forwards;
-    animation-delay: 1.45s;
+    animation-delay: 1.6s;
 }
 
 @media (prefers-reduced-motion: reduce) {

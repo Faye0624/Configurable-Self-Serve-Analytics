@@ -28,6 +28,8 @@ def render() -> None:
             _intro()
 
     with right:
+        # Drop the example down to sit level with the headline.
+        st.markdown('<div class="hero-lead"></div>', unsafe_allow_html=True)
         _demo_card()
 
 
@@ -44,6 +46,7 @@ def _intro() -> None:
     styling.landing_motion()
     tags = "".join(f'<span class="hero-tag">{t}</span>' for t in TAGS)
     st.markdown(
+        f'<div class="hero-lead"></div>'
         f'<div class="hero-tags">{tags}</div>'
         f'<h1 class="hero-title">Self-Serve<br>Analytics</h1>'
         f'<p class="hero-slogan">Ask your data anything.</p>'
