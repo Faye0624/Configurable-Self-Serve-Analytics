@@ -95,7 +95,7 @@ function play() {{
     }}, 1100);
     later(() => card.classList.remove('on'), 7600);   // hold, then fade out
     later(play, 8500);                                 // and replay
-  }}, 45);
+  }}, 32);
 }}
 setTimeout(play, 150);
 </script>

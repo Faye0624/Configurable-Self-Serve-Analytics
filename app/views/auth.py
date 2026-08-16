@@ -8,6 +8,7 @@ form, so the page never navigates away from the introduction.
 import streamlit as st
 
 import demo_card
+import styling
 from ssa.services import AuthError
 from state import get_auth, sign_in
 
@@ -40,6 +41,7 @@ TAGS = ("configurable", "transparent", "self-hostable")
 
 
 def _intro() -> None:
+    styling.landing_motion()
     tags = "".join(f'<span class="hero-tag">{t}</span>' for t in TAGS)
     st.markdown(
         f'<div class="hero-tags">{tags}</div>'
@@ -57,6 +59,7 @@ def _intro() -> None:
 
 
 def _sign_in_form() -> None:
+    styling.form_motion()
     st.subheader("Sign in")
     with st.form("sign_in"):
         username = st.text_input("Username")
@@ -72,6 +75,7 @@ def _sign_in_form() -> None:
 
 
 def _register_form() -> None:
+    styling.form_motion()
     st.subheader("Create an account")
     with st.form("register"):
         username = st.text_input("Choose a username")
