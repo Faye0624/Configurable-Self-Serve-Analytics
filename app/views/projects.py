@@ -15,26 +15,48 @@ def render() -> None:
     store = get_store()
     projects = store.list_projects(user.username)
 
-    st.title("Projects")
-    st.caption("Each project keeps its own data, configuration and query history.")
-
-    _new_project_form(store, user.username)
-    st.divider()
+    st.markdown('<h1 class="page-title">Projects</h1>', unsafe_allow_html=True)
 
     if not projects:
-        st.info("You don't have any projects yet — create one above to get started.")
+        _empty_state(store, user.username)
         return
 
+    st.markdown(
+        '<p class="page-lede">Each project keeps its own data, configuration '
+        'and query history.</p>',
+        unsafe_allow_html=True,
+    )
     for project in projects:
         _project_card(store, project)
 
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+    with st.expander("New project"):
+        _create_form(store, user.username, key="new_project")
 
-def _new_project_form(store, owner: str) -> None:
-    with st.form("new_project", clear_on_submit=True):
-        cols = st.columns([4, 1])
-        name = cols[0].text_input("Project name", placeholder="e.g. Olist e-commerce",
-                                  label_visibility="collapsed")
-        created = cols[1].form_submit_button("Create project", type="primary")
+
+def _empty_state(store, owner: str) -> None:
+    """Nothing to show yet, so the page becomes one clear invitation."""
+    _, middle, _ = st.columns([1, 2.2, 1])
+    with middle:
+        st.markdown(
+            '<div class="empty-state">'
+            '<div class="empty-title">No projects yet</div>'
+            '<div class="empty-lede">A project holds your data, how you\'ve '
+            'described it, and everything you ask about it.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        _create_form(store, owner, key="first_project",
+                     button_label="Create a project")
+
+
+def _create_form(store, owner: str, key: str,
+                 button_label: str = "Create project") -> None:
+    with st.form(key, clear_on_submit=True):
+        name = st.text_input("Project name", placeholder="e.g. Olist e-commerce",
+                             label_visibility="collapsed")
+        created = st.form_submit_button(button_label, type="primary",
+                                        width="stretch")
     if created:
         if not name.strip():
             st.error("Please give the project a name.")

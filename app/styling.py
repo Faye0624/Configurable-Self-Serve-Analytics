@@ -65,6 +65,14 @@ h1, h2, .hero-title {{
 
 /* --- app shell ---------------------------------------------------------- */
 
+/* Streamlit's own toolbar ("Deploy" and the ⋮ menu) is for whoever runs the
+   app, not for the people using it — hide it so the page has one header. */
+[data-testid="stToolbar"] {{ display: none; }}
+#MainMenu {{ visibility: hidden; }}
+
+/* Reclaim the space the toolbar occupied. */
+.block-container {{ padding-top: 2.4rem; }}
+
 .sidebar-brand {{
     font-family: 'Fraunces', Georgia, serif;
     font-size: 1.28rem;
@@ -86,6 +94,47 @@ h1, h2, .hero-title {{
     color: #8E8779;
     padding-top: 0.55rem;
     white-space: nowrap;
+}}
+
+/* --- page furniture ------------------------------------------------------ */
+
+/* The page title is the largest thing on screen, so it reads first. */
+.page-title {{
+    font-family: 'Fraunces', Georgia, serif !important;
+    font-size: 2.6rem !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.02em;
+    color: #F5F2EC;
+    margin: 0.4rem 0 0.3rem;
+}}
+
+.page-lede {{
+    font-size: 0.98rem;
+    color: #8E8779;
+    margin: 0 0 1.8rem;
+}}
+
+.section-gap {{ height: 1.6rem; }}
+
+/* An empty page should invite one action rather than explain itself. */
+.empty-state {{
+    text-align: center;
+    padding: 3.5rem 0 1.8rem;
+}}
+
+.empty-title {{
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 500;
+    color: #E4DED2;
+}}
+
+.empty-lede {{
+    font-size: 0.97rem;
+    line-height: 1.65;
+    color: #8E8779;
+    max-width: 26rem;
+    margin: 0.8rem auto 0;
 }}
 
 .hero-tag {{
