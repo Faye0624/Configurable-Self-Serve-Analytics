@@ -18,11 +18,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import streamlit as st
 
+import styling
 from state import current_user, get_workspace, sign_out
 from views import ask, auth, dashboard, data, projects
 
 # Page-level config must be the first Streamlit call.
 st.set_page_config(page_title="Self-Serve Analytics", layout="wide")
+styling.inject()
 
 # Screens available once a project is open.
 PROJECT_SCREENS = {
