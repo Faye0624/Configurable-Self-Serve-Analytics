@@ -35,10 +35,18 @@ def _go(view: str) -> None:
 
 
 # --- left column ------------------------------------------------------------ #
+TAGS = ("configurable", "transparent", "self-hostable")
+
+
 def _intro() -> None:
-    st.caption("configurable · transparent · self-hostable")
-    st.title("Self-Serve Analytics")
-    st.write("Ask your data anything.")
+    tags = "".join(f'<span class="hero-tag">{t}</span>' for t in TAGS)
+    st.markdown(
+        f'<div class="hero-tags">{tags}</div>'
+        f'<h1 class="hero-title">Self-Serve<br>Analytics</h1>'
+        f'<p class="hero-slogan">Ask your data anything.</p>'
+        f'<div class="hero-spacer"></div>',
+        unsafe_allow_html=True,
+    )
 
     sign_in_col, register_col = st.columns(2)
     if sign_in_col.button("Sign in", type="primary", width="stretch"):
