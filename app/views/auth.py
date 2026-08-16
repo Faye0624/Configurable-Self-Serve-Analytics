@@ -32,6 +32,11 @@ def render() -> None:
         st.markdown('<div class="hero-lead"></div>', unsafe_allow_html=True)
         _demo_card()
 
+    # The two ways in sit centred beneath both columns, so the choice reads as
+    # the page's single next step rather than part of the copy.
+    if view == LANDING:
+        _ways_in()
+
 
 def _go(view: str) -> None:
     st.session_state.auth_view = view
@@ -49,12 +54,15 @@ def _intro() -> None:
         f'<div class="hero-lead"></div>'
         f'<div class="hero-tags">{tags}</div>'
         f'<h1 class="hero-title">Self-Serve<br>Analytics</h1>'
-        f'<p class="hero-slogan">Ask your data anything.</p>'
-        f'<div class="hero-spacer"></div>',
+        f'<p class="hero-slogan">Ask your data anything.</p>',
         unsafe_allow_html=True,
     )
 
-    sign_in_col, register_col = st.columns(2)
+
+def _ways_in() -> None:
+    """The two entry points, centred below the page."""
+    st.markdown('<div class="hero-spacer"></div>', unsafe_allow_html=True)
+    _, sign_in_col, register_col, _ = st.columns([1.35, 1, 1, 1.35])
     if sign_in_col.button("Sign in", type="primary", width="stretch"):
         _go(SIGN_IN)
     if register_col.button("Create an account", width="stretch"):

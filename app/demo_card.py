@@ -11,10 +11,10 @@ import streamlit.components.v1 as components
 
 QUESTION = "Which category sells the most?"
 SQL = "SELECT category, SUM(price) AS total\nFROM orders GROUP BY category"
-BARS = [54, 41, 32, 21, 13]          # relative heights, tallest first
+BARS = [88, 66, 50, 33, 21]          # relative heights, tallest first
 CAPTION = "bed_bath_table leads with £11,245"
 
-HEIGHT = 300
+HEIGHT = 400
 
 _HTML = f"""
 <!doctype html>
@@ -24,35 +24,35 @@ _HTML = f"""
 * {{ box-sizing: border-box; }}
 body {{ margin: 0; background: transparent; font-family: 'Manrope', sans-serif; }}
 .card {{
-  background: #1E1C19; border: 1px solid #2E2A25; border-radius: 12px;
-  padding: 16px 18px; opacity: 0; transition: opacity .7s ease;
+  background: #1E1C19; border: 1px solid #2E2A25; border-radius: 14px;
+  padding: 22px 24px; opacity: 0; transition: opacity .7s ease;
 }}
 .card.on {{ opacity: 1; }}
 .dots {{ display: flex; gap: 5px; margin-bottom: 12px; }}
-.dot {{ width: 6px; height: 6px; border-radius: 50%; background: #3A352E; }}
+.dot {{ width: 7px; height: 7px; border-radius: 50%; background: #3A352E; }}
 .ask {{
   background: #141311; border: 1px solid #2A2621; border-radius: 7px;
-  padding: 9px 11px; min-height: 34px; font-size: 12.5px; color: #E4DED2;
+  padding: 13px 15px; min-height: 44px; font-size: 14.5px; color: #E4DED2;
 }}
 .cursor {{
-  display: inline-block; width: 6px; height: 13px; background: #D9C7A3;
+  display: inline-block; width: 7px; height: 16px; background: #D9C7A3;
   vertical-align: -2px; animation: blink 1s steps(2) infinite;
 }}
 @keyframes blink {{ 0%,50% {{ opacity: 1 }} 51%,100% {{ opacity: 0 }} }}
 .sql {{
-  font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.65;
-  color: #8FB89E; margin-top: 12px; white-space: pre; opacity: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7;
+  color: #8FB89E; margin-top: 16px; white-space: pre; opacity: 0;
   transition: opacity .5s ease;
 }}
-.chart {{ margin-top: 14px; opacity: 0; transition: opacity .5s ease; }}
-.bars {{ display: flex; align-items: flex-end; gap: 7px; height: 60px; }}
+.chart {{ margin-top: 20px; opacity: 0; transition: opacity .5s ease; }}
+.bars {{ display: flex; align-items: flex-end; gap: 9px; height: 96px; }}
 .bar {{
   flex: 1; height: 0; border-radius: 3px; background: #D9C7A3;
   transition: height .7s cubic-bezier(.22,.61,.36,1);
 }}
 .bar:nth-child(3), .bar:nth-child(4) {{ background: #8C7F66; }}
 .bar:nth-child(5) {{ background: #5C5548; }}
-.caption {{ font-size: 11px; color: #A79F90; margin-top: 10px; }}
+.caption {{ font-size: 12.5px; color: #A79F90; margin-top: 14px; }}
 .on {{ opacity: 1; }}
 </style>
 
