@@ -87,6 +87,40 @@ h1, h2, .hero-title {{
     color: #E4DED2;
 }}
 
+.nav-gap {{ height: 1.2rem; }}
+
+/* Navigation: one quiet block per destination, the current one inverted. */
+[data-testid="stSidebar"] .stButton > button {{
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 0.62rem 0.9rem;
+    margin-bottom: 2px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #A79F90;
+    font-size: 1rem;
+    font-weight: 400;
+    transition: background .18s ease, color .18s ease;
+}}
+
+[data-testid="stSidebar"] .stButton > button:hover {{
+    background: rgba(217, 199, 163, 0.08);
+    color: #E4DED2;
+}}
+
+/* The active destination. Streamlit marks primary buttons differently across
+   versions, so match every form of the attribute. */
+[data-testid="stSidebar"] .stButton > button[kind="primary"],
+[data-testid="stSidebar"] .stButton > button[kind="primaryFormSubmit"],
+[data-testid="stSidebar"] [data-testid*="rimary"] > button,
+[data-testid="stSidebar"] button[data-testid*="rimary"] {{
+    background: #D9C7A3;
+    color: #221E18;
+    font-weight: 500;
+}}
+
 /* Account details sit quietly in the top right, level with the sign-out. */
 .account-name {{
     text-align: right;

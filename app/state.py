@@ -104,11 +104,13 @@ def open_project(project: Project) -> None:
     """Make `project` the active one, rebuilding its workspace from its own file."""
     close_workspace()
     st.session_state.project_id = project.id
+    st.session_state.screen = "Data"      # opening a project starts at its data
 
 
 def close_workspace() -> None:
     st.session_state.pop("workspace", None)
     st.session_state.pop("project_id", None)
+    st.session_state.pop("screen", None)
 
 
 def get_workspace() -> Workspace | None:

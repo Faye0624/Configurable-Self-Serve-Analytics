@@ -35,7 +35,12 @@ PROJECT_SCREENS = {
 
 
 def render_sidebar(workspace) -> str:
-    """Draw the left navigation and return the chosen screen."""
+    """Draw the left navigation and return the chosen screen.
+
+    The navigation is built from buttons rather than a radio group: it gives
+    each destination a full-width block that can be highlighted when active,
+    which a radio's circles can't.
+    """
     st.sidebar.markdown(
         '<div class="sidebar-brand">Self-Serve Analytics</div>',
         unsafe_allow_html=True,
@@ -51,7 +56,18 @@ def render_sidebar(workspace) -> str:
     )
     tables = len(workspace.project.tables)
     st.sidebar.caption(f"{tables} table{'' if tables == 1 else 's'} loaded")
-    return st.sidebar.radio("Navigate", ["Projects", *PROJECT_SCREENS], index=1)
+    st.sidebar.markdown('<div class="nav-gap"></div>', unsafe_allow_html=True)
+
+    current = st.session_state.get("screen", "Data")
+    for name in ("Projects", *PROJECT_SCREENS):
+        selected = name == current
+        if st.sidebar.button(
+            name, key=f"nav_{name}", width="stretch",
+            type="primary" if selected else "secondary",
+        ) and not selected:
+            st.session_state.screen = name
+            st.rerun()
+    return current
 
 
 def render_account_bar() -> None:
