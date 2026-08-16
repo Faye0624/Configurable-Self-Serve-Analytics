@@ -7,6 +7,7 @@ form, so the page never navigates away from the introduction.
 
 import streamlit as st
 
+import demo_card
 from ssa.services import AuthError
 from state import get_auth, sign_in
 
@@ -96,16 +97,5 @@ def _back() -> None:
 
 # --- right column ----------------------------------------------------------- #
 def _demo_card() -> None:
-    """A worked example of the product: a question, its SQL, and the answer.
-
-    Static for now; the typing animation replaces this in a later step.
-    """
-    with st.container(border=True):
-        st.caption("Which category sells the most?")
-        st.code("SELECT category, SUM(price) AS total\nFROM orders GROUP BY category",
-                language="sql")
-        st.bar_chart(
-            {"total": [11245, 8410, 6320, 4180, 2600]},
-            height=140, color="#D9C7A3",
-        )
-        st.caption("bed_bath_table leads with £11,245")
+    """A worked example of the product: a question, its SQL, and the answer."""
+    demo_card.render()
