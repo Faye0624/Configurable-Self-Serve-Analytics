@@ -8,6 +8,11 @@ maxUploadSize = 25
 [browser]
 gatherUsageStats = false
 
+# Charcoal and warm sand: a dark, low-contrast base with a single warm accent,
+# so charts and data stay the brightest things on the page.
 [theme]
-base = "light"
-primaryColor = "#4C6FFF"          # matches the chart colour
+base = "dark"
+backgroundColor = "#171614"          # page
+secondaryBackgroundColor = "#1E1C19"  # cards, sidebar, inputs
+primaryColor = "#D9C7A3"             # sand — buttons, focus, selection
+textColor = "#F5F2EC"

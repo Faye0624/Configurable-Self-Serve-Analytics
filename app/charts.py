@@ -8,8 +8,10 @@ here — the SQL/aggregation already happened in ``ssa``; this only presents it.
 import pandas as pd
 import plotly.express as px
 
-# Neutral single-hue palette so the charts read as one product, not a rainbow.
-_BAR_COLOR = "#4C6FFF"
+# Single warm hue, matching the app's sand accent, so charts read as one
+# product rather than a rainbow.
+_BAR_COLOR = "#D9C7A3"
+_SEQUENTIAL = [[0, "#241F19"], [0.5, "#8C7F66"], [1, "#F0E4CB"]]  # dark -> sand
 
 
 def metric_bar(df: pd.DataFrame, dimension: str, value: str = "total"):
@@ -30,7 +32,7 @@ def cohort_matrix(df: pd.DataFrame) -> pd.DataFrame:
 
 def cohort_heatmap(matrix: pd.DataFrame):
     """Heatmap of a cohort retention matrix (rows = cohort, cols = period)."""
-    fig = px.imshow(matrix, aspect="auto", color_continuous_scale="Blues",
+    fig = px.imshow(matrix, aspect="auto", color_continuous_scale=_SEQUENTIAL,
                     labels=dict(x="months since first activity", y="cohort",
                                 color="entities"))
     fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=280)
@@ -63,7 +65,7 @@ def rfm_heatmap(df: pd.DataFrame):
             .reindex(index=range(5, 0, -1), columns=range(1, 6))  # F=5 on top
             .fillna(0).astype(int))
     fig = px.imshow(grid, text_auto=True, aspect="auto",
-                    color_continuous_scale="Blues",
+                    color_continuous_scale=_SEQUENTIAL,
                     labels=dict(x="Recency score (R)", y="Frequency score (F)",
                                 color="customers"))
     fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=300)
