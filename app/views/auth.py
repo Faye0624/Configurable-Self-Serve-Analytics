@@ -1,7 +1,8 @@
-"""Sign-in / registration screen.
+"""Landing page and account access.
 
-Shown until someone is signed in; every other screen is behind it. Passwords go
-straight to ``AuthService`` (hashed there) — this view only collects them.
+Everything before signing in lives here. The landing view introduces the
+product and offers two ways in; choosing one swaps the left column for that
+form, so the page never navigates away from the introduction.
 """
 
 import streamlit as st
@@ -9,21 +10,45 @@ import streamlit as st
 from ssa.services import AuthError
 from state import get_auth, sign_in
 
+LANDING, SIGN_IN, REGISTER = "landing", "sign_in", "register"
+
 
 def render() -> None:
-    st.title("Self-Serve Analytics")
-    st.caption("Upload your data, configure what each column means, and get "
-               "analyses and natural-language answers — no SQL required.")
-    st.divider()
+    view = st.session_state.get("auth_view", LANDING)
+    left, right = st.columns([1.05, 1], gap="large")
 
-    sign_in_tab, register_tab = st.tabs(["Sign in", "Create an account"])
-    with sign_in_tab:
-        _sign_in_form()
-    with register_tab:
-        _register_form()
+    with left:
+        if view == SIGN_IN:
+            _sign_in_form()
+        elif view == REGISTER:
+            _register_form()
+        else:
+            _intro()
+
+    with right:
+        _demo_card()
+
+
+def _go(view: str) -> None:
+    st.session_state.auth_view = view
+    st.rerun()
+
+
+# --- left column ------------------------------------------------------------ #
+def _intro() -> None:
+    st.caption("configurable · transparent · self-hostable")
+    st.title("Self-Serve Analytics")
+    st.write("Ask your data anything.")
+
+    sign_in_col, register_col = st.columns(2)
+    if sign_in_col.button("Sign in", type="primary", width="stretch"):
+        _go(SIGN_IN)
+    if register_col.button("Create an account", width="stretch"):
+        _go(REGISTER)
 
 
 def _sign_in_form() -> None:
+    st.subheader("Sign in")
     with st.form("sign_in"):
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
@@ -34,9 +59,11 @@ def _sign_in_form() -> None:
             st.rerun()
         except AuthError as exc:
             st.error(str(exc))
+    _back()
 
 
 def _register_form() -> None:
+    st.subheader("Create an account")
     with st.form("register"):
         username = st.text_input("Choose a username")
         password = st.text_input("Choose a password", type="password")
@@ -45,9 +72,32 @@ def _register_form() -> None:
     if submitted:
         if password != confirm:
             st.error("The two passwords don't match.")
-            return
-        try:
-            sign_in(get_auth().register(username, password))
-            st.rerun()
-        except AuthError as exc:
-            st.error(str(exc))
+        else:
+            try:
+                sign_in(get_auth().register(username, password))
+                st.rerun()
+            except AuthError as exc:
+                st.error(str(exc))
+    _back()
+
+
+def _back() -> None:
+    if st.button("← Back"):
+        _go(LANDING)
+
+
+# --- right column ----------------------------------------------------------- #
+def _demo_card() -> None:
+    """A worked example of the product: a question, its SQL, and the answer.
+
+    Static for now; the typing animation replaces this in a later step.
+    """
+    with st.container(border=True):
+        st.caption("Which category sells the most?")
+        st.code("SELECT category, SUM(price) AS total\nFROM orders GROUP BY category",
+                language="sql")
+        st.bar_chart(
+            {"total": [11245, 8410, 6320, 4180, 2600]},
+            height=140, color="#D9C7A3",
+        )
+        st.caption("bed_bath_table leads with £11,245")
