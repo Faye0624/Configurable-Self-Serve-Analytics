@@ -47,15 +47,6 @@ h1, h2, .hero-title {{
     margin: 1.5rem 0 0;
 }}
 
-/* One plain sentence for anyone who wants to know what it actually does. */
-.hero-support {{
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.98rem;
-    line-height: 1.65;
-    color: #8E8779;
-    max-width: 30rem;
-    margin: 1.1rem 0 0;
-}}
 
 .hero-tags {{
     display: flex;
@@ -91,13 +82,12 @@ h1, h2, .hero-title {{
 # make the whole product feel broken.
 _LANDING_MOTION = """
 <style>
-/* The title lands first, then the tags above it, then the lines beneath. */
-.hero-title   { animation-delay: .15s; }
-.hero-tags    { animation-delay: .70s; }
-.hero-slogan  { animation-delay: 1.15s; }
-.hero-support { animation-delay: 1.55s; }
+/* The title lands first, then the tags above it, then the line beneath. */
+.hero-title  { animation-delay: .15s; }
+.hero-tags   { animation-delay: .70s; }
+.hero-slogan { animation-delay: 1.15s; }
 
-.hero-title, .hero-tags, .hero-slogan, .hero-support, .stButton, iframe {
+.hero-title, .hero-tags, .hero-slogan, .stButton, iframe {
     opacity: 0;
     animation: rise .85s cubic-bezier(.22, .61, .36, 1) forwards;
 }
@@ -105,12 +95,27 @@ _LANDING_MOTION = """
 /* The example arrives once the copy has settled... */
 iframe { animation-delay: 1.7s; }
 
-/* ...and the two ways in wait until it has played through once, so the
-   demonstration gets watched before the page asks for a decision. */
-.stButton { animation-delay: 4.7s; }
+/* ...and once it has played through, the page lifts to make room and the two
+   ways in appear, so the demonstration is watched before a decision is asked
+   for. Shrinking the top spacer is what pulls everything upward. */
+@keyframes lift {
+    to { height: clamp(1rem, 4vh, 2.5rem); }
+}
+.hero-lead {
+    animation: lift .9s cubic-bezier(.22, .61, .36, 1) 4.3s forwards;
+}
+.stButton { animation-delay: 4.9s; }
+
+/* Larger, calmer buttons — they are the page's only call to action. */
+.stButton > button {
+    padding: 0.85rem 1.4rem;
+    font-size: 1.02rem;
+    font-weight: 500;
+    border-radius: 10px;
+}
 
 @media (prefers-reduced-motion: reduce) {
-    .hero-tags, .hero-title, .hero-slogan, .hero-support, .stButton, iframe {
+    .hero-tags, .hero-title, .hero-slogan, .stButton, iframe, .hero-lead {
         animation: none; opacity: 1;
     }
 }

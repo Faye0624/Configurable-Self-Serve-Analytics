@@ -54,9 +54,7 @@ def _intro() -> None:
         f'<div class="hero-lead"></div>'
         f'<div class="hero-tags">{tags}</div>'
         f'<h1 class="hero-title">Self-Serve<br>Analytics</h1>'
-        f'<p class="hero-slogan">Ask your data anything.</p>'
-        f'<p class="hero-support">Upload a file, say what each column means, and the '
-        f'analyses unlock themselves — every answer shows the SQL behind it.</p>',
+        f'<p class="hero-slogan">Ask your data anything.</p>',
         unsafe_allow_html=True,
     )
 
