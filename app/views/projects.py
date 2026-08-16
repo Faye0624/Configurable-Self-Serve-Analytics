@@ -41,8 +41,8 @@ def _empty_state(store, owner: str) -> None:
         st.markdown(
             '<div class="empty-state">'
             '<div class="empty-title">No projects yet</div>'
-            '<div class="empty-lede">A project holds your data, how you\'ve '
-            'described it, and everything you ask about it.</div>'
+            '<div class="empty-lede">You can create one or more projects, so '
+            'your data stays separate and each one is queried on its own.</div>'
             '</div>',
             unsafe_allow_html=True,
         )
