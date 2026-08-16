@@ -21,6 +21,15 @@ html, body, [class*="st-"], button, input, textarea, select {{
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
 }}
 
+/* Streamlit draws its icons as ligatures in a Material font. The rule above
+   would replace that font and leave the ligature names showing as raw text
+   ("keyboard_double_arrow_left"), so put the icon font back. */
+[data-testid="stIconMaterial"],
+[class*="material-symbols"],
+[class*="material-icons"] {{
+    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+}}
+
 /* Display type. Streamlit's own heading styles are more specific, so these
    need !important to win. */
 h1, h2, .hero-title {{
@@ -52,6 +61,31 @@ h1, h2, .hero-title {{
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
+}}
+
+/* --- app shell ---------------------------------------------------------- */
+
+.sidebar-brand {{
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.28rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #F5F2EC;
+}}
+
+.sidebar-project {{
+    font-size: 1rem;
+    font-weight: 500;
+    color: #E4DED2;
+}}
+
+/* Account details sit quietly in the top right, level with the sign-out. */
+.account-name {{
+    text-align: right;
+    font-size: 0.87rem;
+    color: #8E8779;
+    padding-top: 0.55rem;
+    white-space: nowrap;
 }}
 
 .hero-tag {{

@@ -36,25 +36,34 @@ PROJECT_SCREENS = {
 
 def render_sidebar(workspace) -> str:
     """Draw the left navigation and return the chosen screen."""
-    st.sidebar.title("Self-Serve Analytics")
-    st.sidebar.caption("configurable · transparent · self-hostable")
-    st.sidebar.divider()
-
-    user = current_user()
-    st.sidebar.write(f"Signed in as **{user.username}**")
-    if st.sidebar.button("Sign out"):
-        sign_out()
-        st.rerun()
+    st.sidebar.markdown(
+        '<div class="sidebar-brand">Self-Serve Analytics</div>',
+        unsafe_allow_html=True,
+    )
     st.sidebar.divider()
 
     if workspace is None:
         return "Projects"
 
-    st.sidebar.write(f"**Project:** {workspace.project.name}")
+    st.sidebar.markdown(
+        f'<div class="sidebar-project">{workspace.project.name}</div>',
+        unsafe_allow_html=True,
+    )
     tables = len(workspace.project.tables)
     st.sidebar.caption(f"{tables} table{'' if tables == 1 else 's'} loaded")
-    choice = st.sidebar.radio("Navigate", ["Projects", *PROJECT_SCREENS], index=1)
-    return choice
+    return st.sidebar.radio("Navigate", ["Projects", *PROJECT_SCREENS], index=1)
+
+
+def render_account_bar() -> None:
+    """Who is signed in, and the way out — top right, out of the way."""
+    _, name, action = st.columns([7, 2, 1])
+    name.markdown(
+        f'<div class="account-name">Signed in as <b>{current_user().username}</b></div>',
+        unsafe_allow_html=True,
+    )
+    if action.button("Sign out", key="sign_out"):
+        sign_out()
+        st.rerun()
 
 
 def main() -> None:
@@ -66,6 +75,7 @@ def main() -> None:
     # 2. signed in -> pick a project, then work inside it
     workspace = get_workspace()
     screen = render_sidebar(workspace)
+    render_account_bar()
     if workspace is None or screen == "Projects":
         projects.render()
         return
