@@ -99,8 +99,8 @@ function play() {{
 }}
 // The card fades in with the buttons; typing starts once it is on screen,
 // otherwise the whole animation would play behind a transparent iframe.
-card.classList.add('on');
-setTimeout(play, 2200);
+// Starts as the left-hand copy finishes: play() fades the card in and types.
+setTimeout(play, 2000);
 </script>
 """
 

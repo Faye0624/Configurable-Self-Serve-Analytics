@@ -82,19 +82,24 @@ h1, h2, .hero-title {{
 # make the whole product feel broken.
 _LANDING_MOTION = """
 <style>
-/* One line at a time down the left column: title, then the tags above it,
-   then the slogan beneath. Each takes .85s, so the last lands at 2.0s. */
-.hero-title  { animation-delay: .15s; }
-.hero-tags   { animation-delay: .70s; }
-.hero-slogan { animation-delay: 1.15s; }
-
-.hero-title, .hero-tags, .hero-slogan, .stButton, iframe {
+/* The copy and the buttons arrive with the same movement. The example is not
+   listed here on purpose: hiding a component iframe from outside is unreliable
+   — if the animation doesn't run the card would stay invisible for good — so
+   it fades itself in on its own schedule instead. */
+.hero-title, .hero-tags, .hero-slogan, .stButton {
     opacity: 0;
     animation: rise .85s cubic-bezier(.22, .61, .36, 1) forwards;
 }
 
-/* The example picks up the moment the copy finishes. */
-iframe { animation-delay: 2.0s; }
+/* These delays must come *after* the `animation` shorthand above: the shorthand
+   resets every animation-* property it covers, so putting the delays first
+   silently zeroes them and everything appears at once.
+
+   One line at a time down the left column; each takes .85s, so the last lands
+   at 2.0s — which is when the example picks up. */
+.hero-title  { animation-delay: .15s; }
+.hero-tags   { animation-delay: .70s; }
+.hero-slogan { animation-delay: 1.15s; }
 
 /* The demonstration runs to about 5.3s. After a half-second pause the page
    lifts to make room, and the two ways in follow — so the product is shown
@@ -116,7 +121,7 @@ iframe { animation-delay: 2.0s; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .hero-tags, .hero-title, .hero-slogan, .stButton, iframe, .hero-lead {
+    .hero-tags, .hero-title, .hero-slogan, .stButton, .hero-lead {
         animation: none; opacity: 1;
     }
 }
