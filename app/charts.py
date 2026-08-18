@@ -32,9 +32,11 @@ def cohort_matrix(df: pd.DataFrame) -> pd.DataFrame:
 
 def cohort_heatmap(matrix: pd.DataFrame):
     """Heatmap of a cohort retention matrix (rows = cohort, cols = period)."""
+    # "entities" is the engine's word — it has to be, since the identifier role
+    # can be anything. On screen it just reads as jargon, so label it plainly.
     fig = px.imshow(matrix, aspect="auto", color_continuous_scale=_SEQUENTIAL,
                     labels=dict(x="months since first activity", y="cohort",
-                                color="entities"))
+                                color="customers"))
     fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=280)
     return fig
 

@@ -10,6 +10,21 @@ class UnlockResult:
     reason: str = ""
 
 
+# What is missing, in ordinary words. "needs role(s): measure" was precise but
+# meaningless to anyone who does not already know the vocabulary.
+#
+# The role name stays in brackets because the role editor labels its options
+# "measure", "date" and so on: a user told only to add "an amount column" would
+# have to guess which of those to pick. How to fix it is left to the line at the
+# foot of the dashboard, so each card stays short enough to scan.
+_MISSING_ROLE_HELP = {
+    Role.MEASURE: "an amount column (measure)",
+    Role.DATE: "a date column (date)",
+    Role.IDENTIFIER: "a column identifying who or what (identifier)",
+    Role.DIMENSION: "a category column to group by (dimension)",
+}
+
+
 # Decides which analysis templates a project has unlocked (US9) and, when
 # locked, why (US10). A template unlocks when one connected cluster of tables
 # together provides all the roles it needs.
@@ -23,13 +38,21 @@ class UnlockEngine:
         for t in templates:
             missing = t.required_roles - available
             if missing:
-                names = ", ".join(sorted(str(r) for r in missing))
-                results.append(UnlockResult(t, False, f"needs role(s): {names}"))
+                results.append(UnlockResult(t, False, self._missing_reason(missing)))
             elif any(t.required_roles <= roles for roles in clusters):
                 results.append(UnlockResult(t, True))
             else:
-                results.append(UnlockResult(t, False, "columns not joinable - declare a shared key"))
+                results.append(UnlockResult(t, False,
+                    "Needs data from separate files — mark the column they share "
+                    "as a key in both."))
         return results
+
+    # "Needs an amount column (measure)."
+    def _missing_reason(self, missing: set[Role]) -> str:
+        wants = [_MISSING_ROLE_HELP.get(r, str(r)) for r in sorted(missing, key=str)]
+        if len(wants) > 1:
+            wants = [", ".join(wants[:-1]) + f" and {wants[-1]}"]
+        return f"Needs {wants[0]}."
 
     # Every role assigned somewhere in the project.
     def _available_roles(self, project: Project) -> set[Role]:

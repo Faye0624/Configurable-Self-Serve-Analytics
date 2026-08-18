@@ -48,6 +48,15 @@ def render() -> None:
                 elif result.template.name == "RFM":
                     _template_card(ws, result, ws.templates.run_rfm, _draw_rfm)
 
+    # Always shown, even when nothing is locked: with only three analyses today
+    # an empty board looks finished, and this is what says it is not — more data
+    # means more analyses, and there will be more of them to unlock in time.
+    st.divider()
+    st.caption(
+        "You can upload more files whenever you like — the more your data "
+        "covers, the more analyses open up."
+    )
+
 
 # --------------------------------------------------------------------------- #
 # Filter bar (US13: "filterable")
@@ -83,7 +92,7 @@ def _run_key_metrics(ws: Workspace, results):
 
 
 def _metrics_card(sql, df, dim, error, top_n, selected):
-    st.markdown("**Key metrics**  🔓")
+    st.markdown("**Key metrics**")
     if error:
         st.error(error)
         return
@@ -109,7 +118,7 @@ def _metrics_card(sql, df, dim, error, top_n, selected):
 # Cohort / RFM cards (share the run → draw → SQL/download shape)
 # --------------------------------------------------------------------------- #
 def _template_card(ws, result, run, draw) -> None:
-    st.markdown(f"**{result.template.name}**  🔓")
+    st.markdown(f"**{result.template.name}**")
     try:
         sql, df = run(ws.project)
     except Exception as exc:
@@ -128,14 +137,20 @@ def _draw_cohort(df) -> None:
 
 def _draw_rfm(df) -> None:
     st.plotly_chart(charts.rfm_heatmap(df), width="stretch")
-    with st.expander("Top entities by monetary value"):
-        st.dataframe(df.head(20), width="stretch")
+    with st.expander("Top customers by total spend"):
+        # Renamed for display only — the query keeps the engine's own column
+        # names, which is what Show SQL and the CSV download hand back.
+        st.dataframe(df.head(20).rename(columns={"entity": "customer"}),
+                     width="stretch")
 
 
 # --------------------------------------------------------------------------- #
 # Shared bits
 # --------------------------------------------------------------------------- #
 def _locked_card(result) -> None:
+    # Only locked cards carry a padlock. Marking the unlocked ones too — with an
+    # open padlock — made the two states look alike at a glance, which is exactly
+    # the distinction this screen exists to make.
     st.markdown(f"**{result.template.name}**  🔒")
     st.caption(result.template.description)
     st.warning(result.reason)  # US10: why it's locked

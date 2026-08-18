@@ -143,7 +143,10 @@ def _step_clean(ws: Workspace) -> None:
         st.caption("We found the following in your file.")
         for opt in options:
             with st.container(border=True):
-                st.markdown(f"**{opt.label}**")
+                # The warning sign carries the meaning of this whole screen: each
+                # box is something the tool thinks is wrong, not a report of what
+                # it has already done.
+                st.markdown(f"⚠️ **{opt.label}**")
                 st.caption(opt.detail)
                 if opt.rows is not None and not opt.rows.empty:
                     st.dataframe(opt.rows, width="stretch", hide_index=True)
@@ -152,7 +155,7 @@ def _step_clean(ws: Workspace) -> None:
 
     if issues:
         with st.container(border=True):
-            st.markdown("**Potential data quality issues**")
+            st.markdown("⚠️ **Potential data quality issues**")
             st.caption("Flagged for your review — these require domain knowledge, "
                        "so they are not fixed automatically.")
             for issue in issues:
