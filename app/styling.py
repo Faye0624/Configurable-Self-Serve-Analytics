@@ -212,22 +212,24 @@ _LANDING_MOTION = """
    resets every animation-* property it covers, so putting the delays first
    silently zeroes them and everything appears at once.
 
-   One line at a time down the left column; each takes .85s, so the last lands
-   at 2.0s — which is when the example picks up. */
+   One line at a time down the left column. The lines overlap rather than wait
+   for each other — the slogan starts while the tags are still arriving — so the
+   column reads as one movement and the example can pick up at 1.4s. */
 .hero-title  { animation-delay: .15s; }
-.hero-tags   { animation-delay: .70s; }
-.hero-slogan { animation-delay: 1.15s; }
+.hero-tags   { animation-delay: .60s; }
+.hero-slogan { animation-delay: 1.00s; }
 
-/* The demonstration runs to about 5.3s. After a half-second pause the page
-   lifts to make room, and the two ways in follow — so the product is shown
-   before a decision is asked for. Shrinking the top spacer pulls it upward. */
+/* The bars finish settling at about 4.4s. The page lifts as they land rather
+   than after a pause, and the two ways in follow immediately — the product is
+   still shown before a decision is asked for, without the wait that made the
+   page feel stalled. Shrinking the top spacer pulls everything upward. */
 @keyframes lift {
     to { height: clamp(1rem, 4vh, 2.5rem); }
 }
 .hero-lead {
-    animation: lift .9s cubic-bezier(.22, .61, .36, 1) 5.8s forwards;
+    animation: lift .9s cubic-bezier(.22, .61, .36, 1) 4.4s forwards;
 }
-.stButton { animation-delay: 6.0s; }
+.stButton { animation-delay: 4.6s; }
 
 /* Larger, calmer buttons — they are the page's only call to action. */
 .stButton > button {

@@ -25,7 +25,7 @@ _HTML = f"""
 body {{ margin: 0; background: transparent; font-family: 'Manrope', sans-serif; }}
 .card {{
   background: #1E1C19; border: 1px solid #2E2A25; border-radius: 14px;
-  padding: 22px 24px; opacity: 0; transition: opacity .7s ease;
+  padding: 22px 24px; opacity: 0; transition: opacity .45s ease;
 }}
 .card.on {{ opacity: 1; }}
 .dots {{ display: flex; gap: 5px; margin-bottom: 12px; }}
@@ -97,10 +97,10 @@ function play() {{
     later(play, 8500);                                 // and replay
   }}, 32);
 }}
-// The card fades in with the buttons; typing starts once it is on screen,
-// otherwise the whole animation would play behind a transparent iframe.
-// Starts as the left-hand copy finishes: play() fades the card in and types.
-setTimeout(play, 2000);
+// Typing starts once the card is on screen, otherwise the whole animation would
+// play behind a transparent iframe. It begins while the left-hand copy is still
+// arriving — waiting for the column to finish left a visible dead beat.
+setTimeout(play, 1400);
 </script>
 """
 
