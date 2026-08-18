@@ -30,8 +30,25 @@ def render() -> None:
         _project_card(store, project)
 
     st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
-    with st.expander("New project"):
-        _create_form(store, user.username, key="new_project")
+    _new_project(store, user.username)
+
+
+def _new_project(store, owner: str) -> None:
+    """A '+ New project' button that opens the form when asked.
+
+    This was an expander, but Streamlit always draws a chevron on those, which
+    reads as "unfold some text" rather than "make a new thing".
+    """
+    if not st.session_state.get("adding_project"):
+        if st.button("➕  New project", key="add_project", width="stretch"):
+            st.session_state.adding_project = True
+            st.rerun()
+        return
+
+    _create_form(store, owner, key="new_project")
+    if st.button("Cancel", key="cancel_project"):
+        st.session_state.pop("adding_project", None)
+        st.rerun()
 
 
 def _empty_state(store, owner: str) -> None:
@@ -53,7 +70,8 @@ def _empty_state(store, owner: str) -> None:
 def _create_form(store, owner: str, key: str,
                  button_label: str = "Create project") -> None:
     with st.form(key, clear_on_submit=True):
-        name = st.text_input("Project name", placeholder="e.g. Olist e-commerce",
+        name = st.text_input("Project name", key=f"{key}_name",
+                             placeholder="e.g. Olist e-commerce",
                              label_visibility="collapsed")
         created = st.form_submit_button(button_label, type="primary",
                                         width="stretch")
@@ -61,6 +79,7 @@ def _create_form(store, owner: str, key: str,
         if not name.strip():
             st.error("Please give the project a name.")
             return
+        st.session_state.pop("adding_project", None)   # close the form behind us
         open_project(store.create(owner, name))
         st.rerun()
 
