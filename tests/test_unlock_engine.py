@@ -55,6 +55,15 @@ def test_lock_reason_names_the_missing_roles(engine):
     assert "date" in reason and "identifier" in reason
 
 
+def test_lock_reason_is_short_and_says_it_without_jargon(engine):
+    """The reason has to work for someone who does not know the vocabulary."""
+    project = Project("p", [_table("visits", {"customer": Role.IDENTIFIER,
+                                              "when": Role.DATE})])
+    reason = _result(engine.evaluate(project), "Key metrics").reason
+
+    assert reason == "Needs an amount column (measure)."   # plain, and one line
+
+
 def test_an_empty_project_locks_everything(engine):
     results = engine.evaluate(Project("empty"))
     assert not any(r.unlocked for r in results)
@@ -92,7 +101,8 @@ def test_unjoinable_tables_stay_locked(engine):
     result = _result(engine.evaluate(project), "RFM")
 
     assert result.unlocked is False
-    assert "joinable" in result.reason
+    # A different problem, so a different instruction: connect the files.
+    assert "separate files" in result.reason and "key" in result.reason
 
 
 def test_different_keys_do_not_connect_tables(engine):
