@@ -40,7 +40,9 @@ def test_column_types_are_captured(registry, orders_df):
     types = {c.name: c.data_type for c in table.columns}
     assert "int" in types["order_id"]
     assert "float" in types["price"]
-    assert types["customer_id"] == "object"
+    # pandas 3 renamed the text dtype from "object" to "str", so accept either
+    # rather than pinning the test to one pandas version.
+    assert types["customer_id"] in ("object", "str")
 
 
 def test_tables_accumulate_so_data_can_arrive_piece_by_piece(registry, orders_df):

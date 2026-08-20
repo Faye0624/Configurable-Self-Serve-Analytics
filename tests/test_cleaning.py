@@ -32,6 +32,21 @@ def test_detect_finds_whitespace_and_duplicates(cleaner, messy_df):
     assert keys == {TRIM_WHITESPACE, DROP_DUPLICATES}
 
 
+def test_whitespace_is_found_whatever_the_text_dtype(cleaner):
+    """Text is not always the "object" dtype.
+
+    pandas 3 gives text columns a dedicated ``str`` dtype, and a column can be
+    an explicit ``string`` dtype on pandas 2. Selecting columns by the name
+    "object" matched neither, so whitespace went unnoticed on newer installs.
+    """
+    df = pd.DataFrame({"name": pd.Series([" alice", "bob "], dtype="string")})
+
+    assert {o.key for o in cleaner.detect(df)} == {TRIM_WHITESPACE}
+
+    result, _ = cleaner.apply(df, {TRIM_WHITESPACE})
+    assert list(result["name"]) == ["alice", "bob"]
+
+
 def test_detect_does_not_modify_the_data(cleaner, messy_df):
     before = messy_df.copy()
     cleaner.detect(messy_df)

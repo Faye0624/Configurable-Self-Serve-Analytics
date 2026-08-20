@@ -27,6 +27,19 @@ TRIM_WHITESPACE = "trim_whitespace"
 DROP_DUPLICATES = "drop_duplicates"
 
 
+def _text_columns(df: pd.DataFrame) -> list[str]:
+    """The columns holding text, whichever pandas version is installed.
+
+    This used to be ``select_dtypes(include="object")``. pandas 3 gives text
+    columns a dedicated ``str`` dtype, and a column can also be an explicit
+    ``string`` dtype on pandas 2 — in both cases "object" matches nothing, so
+    whitespace was silently never found. Ask what the dtype *is* rather than
+    naming one.
+    """
+    return [c for c in df.columns
+            if df[c].dtype == object or pd.api.types.is_string_dtype(df[c])]
+
+
 class CleaningService:
     MISSING_THRESHOLD = 30.0  # percent missing before a column is flagged
     OUTLIER_WHISKER = 1.5     # IQR multiplier for outlier fences
@@ -40,7 +53,7 @@ class CleaningService:
         options: list[CleaningOption] = []
 
         # --- stray whitespace: which rows, in which columns ---------------- #
-        text_cols = df.select_dtypes(include="object").columns
+        text_cols = _text_columns(df)
         padded = pd.DataFrame(
             {c: df[c].map(lambda v: isinstance(v, str) and v != v.strip())
              for c in text_cols},
@@ -89,7 +102,7 @@ class CleaningService:
         actions: list[str] = []
 
         if TRIM_WHITESPACE in approved:
-            text_cols = df.select_dtypes(include="object").columns
+            text_cols = _text_columns(df)
             for c in text_cols:
                 df[c] = df[c].map(lambda v: v.strip() if isinstance(v, str) else v)
             actions.append("removed extra spaces around text values")
