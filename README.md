@@ -1,15 +1,19 @@
 # Self-Serve Analytics
 
+**Live app: https://self-serve-analytics.streamlit.app**
+
 A configurable, transparent, self-hostable **self-serve data-analysis** tool.
 Non-technical users upload their own data and get insights without writing SQL:
 
 1. **Upload** one or more CSV tables.
-2. **Profile & clean** — each column is profiled and basic cleaning is applied;
-   anything suspicious is flagged for the user to confirm.
-3. **Configure (no code)** — map each column to a *role* (customer / date / amount / …)
-   and declare join keys.
+2. **Review the data quality** — each column is profiled, anything that looks wrong is
+   reported with the offending rows, and *the user decides* whether to clean it. Nothing
+   is rewritten without being asked.
+3. **Confirm what the columns mean (no code)** — the tool works out a *role* for each
+   column (customer / date / amount / category) and the keys that join the tables;
+   the user corrects anything it got wrong.
 4. **Progressive unlock** — analyses (key metrics, cohort / retention, RFM) unlock automatically
-   as the data satisfies each template's requirements.
+   as the data satisfies each template's requirements, and locked ones say what is missing.
 5. **Ask** — query in natural language; the tool shows the **generated SQL** behind every answer.
 
 Because it is **configuration-driven**, the same engine works on a new domain by
