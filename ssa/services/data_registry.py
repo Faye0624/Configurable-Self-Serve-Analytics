@@ -7,10 +7,19 @@ from ssa.db import Database
 from ssa.models import Column, DatasetTable
 
 
+FALLBACK_TABLE_NAME = "table"
+
+
 # Turn a filename into a safe SQL table name: "Orders 2024.csv" -> "orders_2024".
 def safe_table_name(filename: str) -> str:
     stem = Path(filename).stem.lower()
-    return re.sub(r"\W+", "_", stem).strip("_")
+    name = re.sub(r"\W+", "_", stem).strip("_")
+    # A name made only of punctuation ("!!!.csv") leaves nothing behind, and an
+    # empty table name produces SQL that either fails or, worse, creates a table
+    # nobody can refer to. Fall back to something usable.
+    if not name or name[0].isdigit():
+        name = f"{FALLBACK_TABLE_NAME}_{name}" if name else FALLBACK_TABLE_NAME
+    return name
 
 
 # Loads uploaded CSVs into the database and registers them as DatasetTables.

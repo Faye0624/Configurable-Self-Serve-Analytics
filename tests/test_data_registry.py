@@ -18,9 +18,22 @@ def registry(db):
     ("my-file.name.csv", "my_file_name"),
     ("/tmp/path/to/Sales Data.csv", "sales_data"),
     ("__weird__.csv", "weird"),
+    # Nothing survives sanitising, or the result cannot start a SQL identifier:
+    # fall back rather than produce a name no query could refer to.
+    ("!!!.csv", "table"),
+    ("###.csv", "table"),
+    ("2024.csv", "table_2024"),
 ])
 def test_filenames_become_safe_table_names(filename, expected):
     assert safe_table_name(filename) == expected
+
+
+def test_a_file_with_no_usable_name_still_becomes_a_table(registry, orders_df):
+    """An unusable table name would break every later query against it."""
+    table = registry.add_dataframe(safe_table_name("!!!.csv"), orders_df)
+
+    assert table.name == "table"
+    assert registry._db.query('SELECT count(*) AS n FROM "table"').iloc[0]["n"] == len(orders_df)
 
 
 # --- registering a frame ---------------------------------------------------- #
