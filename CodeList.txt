@@ -1,0 +1,166 @@
+Self-Serve Analytics — Code listing and AI attribution
+Yanfei Yu · 3155021Y · MSc IT+ · University of Glasgow
+
+This file lists the significant modules in the project and states, for each,
+whether it was written by me or produced with AI assistance. Standard library
+and third-party packages are not listed.
+
+
+HOW THE WORK WAS DIVIDED
+========================
+
+The core engine — the domain model and the service layer under ssa/ — is my
+own work. It holds the ideas the project is about: the semantic roles, the
+progressive-unlock rules, the SQL generation, and the read-only validation of
+generated queries. I can explain and defend any of it in detail.
+
+AI assistance was used in two places, for two reasons.
+
+  The interface (app/) goes beyond what the taught material covers — a
+  themed dark interface, a staggered landing-page entrance, and an animated
+  HTML/CSS/JavaScript demonstration component. I decided what each screen
+  should do, show and say, and revised it repeatedly; AI assistance produced
+  and refined the implementation from those decisions.
+
+  The test suite (tests/) needed breadth rather than depth: normal paths,
+  boundaries, error handling and invariants across every service. I specified
+  what each area had to guarantee and reviewed the result; AI assistance was
+  used to generate cases and to find gaps in coverage. I added tests myself
+  for defects found during development.
+
+I am able to explain the AI-assisted code as well — the attribution reflects
+who produced it, not what I understand.
+
+
+WRITTEN BY ME
+=============
+
+Domain model — ssa/models/
+
+  role.py                  The five semantic roles a column can take
+                           (identifier, date, measure, dimension, unassigned).
+                           These are the vocabulary the whole engine works in.
+  column.py                One column: name, storage type, assigned role, join
+                           key, and profiling statistics.
+  dataset_table.py         One uploaded table and its columns.
+  project.py               A project: the tables uploaded and configured
+                           together, with its own id and database file.
+  user.py                  A registered account. Holds no password, only the
+                           username.
+  analysis_template.py     Each built-in analysis declared as data: its name,
+                           the roles it requires, and how to describe it. The
+                           unlock rules live here as declarations rather than
+                           as conditional code, so adding an analysis does not
+                           change the engine.
+
+Storage — ssa/db/
+
+  database.py              A thin wrapper over a DuckDB connection, so the
+                           storage engine stays replaceable and tests can run
+                           against an in-memory database.
+
+Service layer — ssa/services/
+
+  data_registry.py         Loads uploaded data into the database and records
+                           its structure. Sanitises filenames into safe SQL
+                           table names.
+  profiling.py             Per-column statistics: null percentage, distinct
+                           count, sample values.
+  cleaning.py              Detects what could be cleaned without changing
+                           anything, applies only what the user approves, and
+                           flags problems that are never fixed automatically.
+                           The separation of detection from application is the
+                           change my supervisor asked for.
+  semantic_config.py       Assigns roles and join keys, and suggests likely
+                           ones from column names and types for the user to
+                           confirm or correct.
+  unlock_engine.py         The centre of the project. Decides which analyses a
+                           project can run — role satisfaction plus key
+                           connectivity across tables, using union-find — and
+                           what is missing when it cannot.
+  template_engine.py       Generates and runs the SQL for each analysis,
+                           including across joined tables, counting distinct
+                           events rather than joined rows.
+  sql_guard.py             Parses generated SQL into a syntax tree and rejects
+                           anything that is not a single read-only query
+                           against known tables.
+  nl_query.py              Natural-language querying: schema to model to
+                           validated SQL to result, with a durable query
+                           history that can be replayed without calling the
+                           model again.
+  project_store.py         Persists projects and keeps each project's data in
+                           its own database file, so two projects cannot see
+                           each other's tables.
+  auth.py                  Registration and login with salted password hashing
+                           (PBKDF2-HMAC-SHA256). Passwords are never stored.
+  usage_limit.py           A daily cap on model calls, since a deployed app
+                           shares one API key.
+
+Model client — ssa/llm/
+
+  base.py                  The interface every language-model client
+                           implements, so the real client and the offline stub
+                           are interchangeable.
+  schema.py                Builds the structure-only description sent to the
+                           model: tables, columns, types and roles — never any
+                           data rows.
+  stub.py                  An offline rule-based client, used by the tests and
+                           whenever no API key is configured.
+  factory.py               Chooses between the real client and the stub.
+  openai_client.py         The real client. Sends the schema and the question
+                           to an OpenAI chat model.
+
+
+AI ASSISTED
+===========
+
+Interface — app/
+  Produced with AI assistance from my design decisions and revisions. This
+  layer includes work beyond the taught material: the theming, the staggered
+  landing-page entrance, and an animated component written in HTML, CSS and
+  JavaScript.
+
+  main.py                  Routing: sign in, choose a project, then work
+                           inside it.
+  state.py                 Session state — the catalogue database, the
+                           signed-in user, and the workspace for the open
+                           project, discarded when the project changes.
+  styling.py               Fonts, colours and the landing-page motion. The
+                           palette, the typeface pairing and the timing of the
+                           entrance were my decisions.
+  demo_card.py             The animated worked example on the landing page: a
+                           question typed out, the SQL, then the result. I
+                           specified the sequence and its timing against the
+                           text beside it.
+  charts.py                Plotly figures. I chose the chart type for each
+                           analysis.
+  formatting.py            Small display helpers.
+  views/auth.py            Landing page, sign-in and registration.
+  views/projects.py        Project list, creation, renaming and deletion,
+                           including the empty state.
+  views/data.py            Upload, data-quality review and role configuration.
+                           I specified that problems are shown with the actual
+                           offending rows, and that cleaning is the user's
+                           decision.
+  views/dashboard.py       The analysis cards, locked and unlocked. I specified
+                           that only locked cards carry a padlock and that the
+                           lock reason is written in plain words rather than
+                           role names.
+  views/ask.py             Natural-language query screen and history.
+
+Tests — tests/
+  Written to my specification with AI assistance in generating cases and
+  finding gaps. 121 cases across the services and the application.
+
+  conftest.py              Shared fixtures, including a small synthetic dataset
+                           whose expected results can be checked by hand.
+  test_*.py                One file per service. Coverage spans normal paths,
+                           boundary values, rejection of invalid input,
+                           degenerate cases, and invariants such as: detection
+                           never modifies data; two projects never see each
+                           other's tables; every template returns the SQL it
+                           ran. Regression tests for two defects found during
+                           development were added by me — the text dtype change
+                           in pandas 3, which had silently disabled whitespace
+                           detection, and filenames that leave no usable table
+                           name.

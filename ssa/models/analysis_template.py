@@ -7,12 +7,14 @@ from ssa.models.role import Role
 @dataclass(frozen=True)
 class AnalysisTemplate:
     name: str
-    required_roles: frozenset[Role]
+    # What roles are needed to run the model
+    required_roles: frozenset[Role] 
+    # how to explain to the user (only show when models are locked)
     description: str = ""
 
 
 # The standard analyses the tool ships with.
-#
+# 
 # The descriptions say what each analysis tells you, in the words someone would
 # use to ask for it — no "measure", no "entities". Those are configuration terms
 # and belong in the lock message, where the point is which column to go and set.
