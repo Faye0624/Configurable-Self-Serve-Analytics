@@ -1,0 +1,94 @@
+Self-Serve Analytics — Software prerequisites
+Yanfei Yu · 3155021Y · MSc IT+ · University of Glasgow
+
+Live application: https://self-serve-analytics.streamlit.app
+
+
+OVERALL SOFTWARE STACK
+======================
+
+Project type        Python web application (Streamlit)
+IDE                 Visual Studio Code
+Language            Python 3.13
+Framework           Streamlit 1.60.0
+Database            DuckDB 1.5.4  — embedded; no database server to install
+JavaScript          none (one small inline HTML/CSS/JS component on the landing page)
+Version control     Git (GitLab, with GitHub used for deployment)
+Deployment          Streamlit Community Cloud
+
+
+KEY SUPPORTING PACKAGES
+=======================
+
+package          version    what it is used for
+-------          -------    -------------------
+streamlit        1.60.0     web interface
+duckdb           1.5.4      embedded analytical database: stores uploaded
+                            tables and runs the generated SQL
+pandas           2.3.3      CSV loading, profiling and light data handling
+plotly           6.9.0      dashboard charts
+sqlglot          30.14.0    parses generated SQL so it can be validated as
+                            read-only before it reaches the database
+openai           2.53.0     optional — the natural-language-to-SQL client.
+                            Without an API key the app falls back to an
+                            offline stub and still runs in full
+python-dotenv    1.x        optional — reads the API key from a local .env
+pytest           9.1.1      test suite
+pytest-cov       latest     coverage reporting (development only)
+
+The authoritative list is requirements.txt in the root of the archive.
+
+
+HOW TO RUN IT
+=============
+
+1. Python 3.13 is required (3.10 or newer will work).
+
+2. From the project root, create and activate a virtual environment:
+
+       python -m venv .venv
+       source .venv/bin/activate          # Windows: .venv\Scripts\activate
+
+3. Install the dependencies:
+
+       pip install -r requirements.txt
+
+4. Start the application:
+
+       streamlit run app/main.py
+
+   It opens at http://localhost:8501.
+
+5. To run the tests:
+
+       pytest -q
+
+   For coverage:
+
+       pytest --cov=ssa --cov-report=term:skip-covered -q
+
+
+NOTES
+=====
+
+No API key is needed.
+  The natural-language query feature uses an offline, rule-based stub unless
+  an OpenAI API key is supplied. Everything else — upload, profiling,
+  cleaning, configuration, progressive unlock, the dashboard, the generated
+  SQL and the query history — works fully without one.
+
+To enable the real model, put a key in a .env file in the project root:
+
+       OPENAI_API_KEY=sk-...
+       SSA_LLM_MODEL=gpt-4o-mini        (optional; this is the default)
+
+No database setup is required.
+  DuckDB is embedded. The application creates its own files on first run:
+  workspace.duckdb for accounts and the project list, and one <project id>.duckdb
+  per project under projects/.
+
+Sample data.
+  sample_data/study/ contains the two CSV files used in the user study
+  (orders.csv and order_items.csv), drawn from the public Olist Brazilian
+  e-commerce dataset. Uploading orders.csv first and order_items.csv second
+  demonstrates progressive unlock.
