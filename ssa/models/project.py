@@ -7,8 +7,6 @@ from ssa.models.dataset_table import DatasetTable
 
 
 @dataclass
-
-
 class Project:
     name: str
     tables: list[DatasetTable] = field(default_factory=list)

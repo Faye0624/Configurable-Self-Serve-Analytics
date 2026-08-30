@@ -6,8 +6,6 @@ from ssa.models.column import Column
 
 
 @dataclass
-
-
 class DatasetTable:
     name: str
     columns: list[Column] = field(default_factory=list)

@@ -6,8 +6,6 @@ from ssa.models.role import Role
 
 
 @dataclass
-
-
 class Column:
     # dataclass is init, repr(decide what print will show), eq(decide two object is equal or not)
     name: str

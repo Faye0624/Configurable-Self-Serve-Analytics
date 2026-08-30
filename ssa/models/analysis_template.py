@@ -6,8 +6,6 @@ from ssa.models.role import Role
 
 
 @dataclass(frozen=True)
-
-
 class AnalysisTemplate:
     name: str
     # What roles are needed to run the model
