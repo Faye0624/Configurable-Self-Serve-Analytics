@@ -1,15 +1,4 @@
-"""Project catalogue and storage (US20 — multiple projects).
-
-Layout:
-  * a **catalogue** database holds the accounts (`_users`) and one row per
-    project (owner + the saved semantic configuration);
-  * each project owns a **separate database file**, `<data_dir>/<project id>.duckdb`,
-    holding that project's uploaded tables and its query history.
-
-Giving each project its own file keeps projects fully isolated — two projects can
-both have an "orders" table, deleting a project is just dropping its file, and
-no SQL anywhere needs to know about namespacing.
-"""
+"""Persists projects; each project's data lives in its own file."""
 
 import json
 from pathlib import Path

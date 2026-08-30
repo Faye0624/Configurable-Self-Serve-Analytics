@@ -1,9 +1,4 @@
-"""Projects screen — create, open, rename and delete projects (US20).
-
-Each project is isolated: its own tables, its own semantic configuration and its
-own query history. Deleting a project destroys data, so it asks for explicit
-confirmation first (supervisor feedback).
-"""
+"""Project list, creation, renaming, deletion."""
 
 import streamlit as st
 

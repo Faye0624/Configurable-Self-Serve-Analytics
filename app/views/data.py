@@ -1,15 +1,4 @@
-"""Data screen — upload wizard and the uploaded-tables list.
-
-Two tabs:
-  * **Upload data** — a 3-step wizard: Upload → Clean → Configure. Each step
-    calls one service (registry / cleaning / profiling + semantic config).
-  * **Uploaded tables** — every table in the project, each with its roles &
-    keys editor so the configuration can be revisited (drives progressive
-    unlock live).
-
-The view only orchestrates and renders; profiling, cleaning, and configuration
-all happen inside ``ssa``.
-"""
+"""Upload, data quality, role configuration."""
 
 import pandas as pd
 import streamlit as st

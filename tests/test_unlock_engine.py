@@ -1,10 +1,4 @@
-"""Tests for progressive unlocking (US9-US11, covers TC-9/TC-10).
-
-The engine decides which analyses a project can run. An analysis unlocks when a
-single *connected* group of tables — tables joined by a shared key — together
-provides every role that analysis needs. When it doesn't unlock, the engine says
-why, which is what the dashboard shows the user.
-"""
+"""Unlock decisions, what is missing, connectivity, transitivity."""
 
 import pytest
 

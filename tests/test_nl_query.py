@@ -1,10 +1,4 @@
-"""Tests for the NL->SQL engine (US15, US17, US22).
-
-Uses the offline StubLLMClient so the tests are deterministic and need no API
-key. Covers: a question becomes runnable SQL, a saved query replays without the
-model, dangerous model output is rejected, and the query log persists across a
-(simulated) restart.
-"""
+"""The full flow; replay skips the model; unsafe output rejected."""
 
 import pytest
 

@@ -1,13 +1,4 @@
-"""An offline, deterministic stand-in for a real NL->SQL model.
-
-It covers the common analytic questions with a few transparent rules, so the
-whole pipeline (generate -> validate -> execute -> show SQL) is reproducible in
-tests and demos without any API key or network. When a real model is
-configured it is used instead (see factory.py); this stub is the fallback.
-
-It is intentionally simple and rule-based — the project's technical depth lives
-in the SqlGuard and the query engine, not here.
-"""
+"""An offline rule-based client — every test runs against it."""
 
 import re
 

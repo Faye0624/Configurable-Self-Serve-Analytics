@@ -1,13 +1,4 @@
-"""Dashboard screen (US13).
-
-Runs the unlock engine, then draws one card per standard analysis:
-  * **unlocked** → the template's SQL is run and the result shown as a chart or
-    table, with the generated SQL and a CSV download beside it;
-  * **locked**   → a greyed card explaining why (the reason from the engine).
-
-A small filter bar drives the key-metrics breakdown. All SQL and aggregation
-happen in ``ssa.TemplateEngine``; this view only renders what it returns.
-"""
+"""The analysis cards, locked ones showing what is missing."""
 
 import streamlit as st
 

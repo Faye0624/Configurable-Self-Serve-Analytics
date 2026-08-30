@@ -1,8 +1,4 @@
-"""Tests for opt-in cleaning (US3/US4).
-
-The service must never change data on its own: `detect` only reports what could
-be fixed, and `apply` changes exactly what the user approved.
-"""
+"""Cleaning — detection never modifies data; nothing unapproved is applied."""
 
 import pandas as pd
 import pytest

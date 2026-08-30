@@ -1,9 +1,4 @@
-"""Chart builders for the dashboard.
-
-Pure functions: each takes a DataFrame (as returned by ``TemplateEngine``) and
-returns a Plotly figure or a reshaped table. No Streamlit and no analysis logic
-here — the SQL/aggregation already happened in ``ssa``; this only presents it.
-"""
+"""The Plotly figures."""
 
 import pandas as pd
 import plotly.express as px

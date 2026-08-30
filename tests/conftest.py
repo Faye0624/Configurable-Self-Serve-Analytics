@@ -1,9 +1,4 @@
-"""Shared pytest fixtures for the test suite.
-
-These build a tiny, fully-configured project (an Olist-like orders table with
-roles assigned) so the service/engine tests have realistic input without
-touching real data files.
-"""
+"""Shared fixtures — an in-memory database and a small synthetic dataset."""
 
 import pandas as pd
 import pytest

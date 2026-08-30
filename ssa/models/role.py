@@ -1,7 +1,8 @@
+"""The five semantic roles — the vocabulary the whole engine works in."""
+
 from enum import Enum
 
 
-# A column's semantic role, assigned during configuration.
 class Role(str, Enum):  
     UNASSIGNED = "unassigned" #user and db will see
     IDENTIFIER = "identifier"

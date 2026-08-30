@@ -1,10 +1,4 @@
-"""The schema contract handed to an NL->SQL model.
-
-Privacy boundary (NFR-2): a Schema carries only *structure* — table names,
-column names, data types and semantic roles. It never contains any data rows.
-Everything sent to an external model is built from this object, so we can state
-exactly what leaves the machine.
-"""
+"""Builds what is sent to the model — structure only, never data rows."""
 
 from dataclasses import dataclass
 

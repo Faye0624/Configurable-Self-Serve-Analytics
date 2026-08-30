@@ -1,4 +1,4 @@
-"""Small display helpers shared by the views."""
+"""Small display helpers."""
 
 import sqlglot
 

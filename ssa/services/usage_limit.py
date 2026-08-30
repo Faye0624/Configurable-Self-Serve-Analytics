@@ -1,14 +1,4 @@
-"""A daily cap on calls to the language model.
-
-A deployed instance shares one API key across everyone who signs up, so an
-unbounded number of questions would be someone else's bill. The limiter counts
-model calls per day in the database and refuses further ones once the cap is
-reached; the app then falls back to explaining that the limit is reached rather
-than failing.
-
-Counting lives in the database (not in memory) so the cap survives restarts and
-holds across sessions.
-"""
+"""A daily cap on model calls, since the deployed app shares one key."""
 
 from datetime import date
 

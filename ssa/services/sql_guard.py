@@ -1,20 +1,4 @@
-"""Read-only SQL safety validator (NFR-1).
-
-Every query — whether written by the NL->SQL model or replayed from history —
-must pass through here before it touches the database. We parse the SQL into an
-abstract syntax tree with sqlglot and enforce, structurally (not by string
-matching), that it is a single read-only SELECT over known tables:
-
-  * exactly one statement (no stacked `...; DROP TABLE ...`);
-  * the top-level statement is a SELECT or a UNION of SELECTs;
-  * no data-/schema-changing node anywhere in the tree
-    (INSERT/UPDATE/DELETE/DROP/CREATE/ALTER/COPY/ATTACH/PRAGMA/…);
-  * no `SELECT ... INTO` (which writes a table);
-  * every referenced table exists in the schema (CTE names excepted).
-
-On any violation it raises SqlGuardError with a human-readable reason, which the
-UI shows to the user (US17). It returns the normalised SQL on success.
-"""
+"""Parses SQL into a syntax tree and allows only single read-only queries."""
 
 import sqlglot
 from sqlglot import exp

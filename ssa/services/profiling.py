@@ -1,9 +1,10 @@
+"""Per-column statistics: null percentage, distinct count, samples."""
+
 import pandas as pd
 
 from ssa.models import Column
 
 
-# Fills each column's profiling stats: null %, distinct count, and a few samples.
 class ProfilingService:
     SAMPLE_SIZE = 5
 

@@ -1,17 +1,4 @@
-"""Natural-language query engine (US15-US18, US22).
-
-Pipeline for a question:
-    build schema (structure only, no data rows — NFR-2)
-      -> LLM turns question + schema into candidate SQL
-      -> SqlGuard validates it is a read-only SELECT over known tables (NFR-1)
-      -> execute read-only and return the rows + the SQL that produced them.
-
-Every answer carries the generated SQL so the UI can show and download it
-(US16). Answered queries are kept in a history that stores the *SQL* (not the
-natural-language question) so a query can be replayed by executing the stored
-SQL directly — no model call (US22). Any failure is returned as a message
-rather than raised, so the UI can ask the user to rephrase (US17).
-"""
+"""The natural-language query flow; history stores SQL so replay skips the model."""
 
 from dataclasses import dataclass, field
 from datetime import datetime

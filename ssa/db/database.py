@@ -1,9 +1,9 @@
+"""A thin wrapper over DuckDB — all SQL goes through it, so storage stays replaceable."""
+
 import duckdb
 import pandas as pd
 
 
-# Thin wrapper around a DuckDB connection. All SQL goes through here, so the
-# storage engine stays swappable (e.g. PostgreSQL in production).
 class Database:
     def __init__(self, path: str = ":memory:"):
         self._con = duckdb.connect(path)

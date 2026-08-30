@@ -1,9 +1,4 @@
-"""Tests for the read-only SQL safety validator (NFR-1, covers TC-N1).
-
-The guard is the gate every generated query passes before it runs, so these
-tests check both directions: legitimate read-only queries are allowed through,
-and a battery of dangerous or malformed queries are all rejected.
-"""
+"""Rejection of unsafe SQL — 20 cases via parametrisation."""
 
 import pytest
 

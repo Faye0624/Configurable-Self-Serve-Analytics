@@ -1,6 +1,4 @@
-# LLM layer: the NL->SQL client interface, the schema contract sent to it,
-# an offline stub, an optional real (OpenAI) client, and a factory that picks
-# one from the environment.
+# The NL->SQL client layer: interface, schema contract, stub, real client, factory.
 from ssa.llm.base import LLMClient
 from ssa.llm.schema import Schema, SchemaColumn, SchemaTable, build_schema
 from ssa.llm.stub import StubLLMClient

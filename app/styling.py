@@ -1,9 +1,4 @@
-"""Web fonts and the few style rules Streamlit's theme can't express.
-
-The theme in `.streamlit/config.toml` sets the colours; this adds the
-typography — Fraunces for display text and Manrope for everything else — plus
-the small landing-page classes those headings need.
-"""
+"""Fonts, colours and the landing-page motion."""
 
 import streamlit as st
 

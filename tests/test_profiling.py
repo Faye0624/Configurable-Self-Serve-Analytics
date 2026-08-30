@@ -1,4 +1,4 @@
-"""Tests for per-column profiling (US2, covers TC-2)."""
+"""Profiling — null percentage, and an empty table not breaking it."""
 
 import numpy as np
 import pandas as pd

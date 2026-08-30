@@ -1,9 +1,4 @@
-"""Tests for the daily cap on language-model calls.
-
-A deployed instance shares one API key, so the number of model calls per day is
-capped. The cap must survive restarts (it is stored in the database) and the
-app must degrade with a clear message rather than an error.
-"""
+"""The cap, surviving a restart, replay not consuming allowance."""
 
 import pytest
 

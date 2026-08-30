@@ -1,11 +1,4 @@
-"""Pick the NL->SQL client from the environment.
-
-Configuration is read from, in order: a local `.env` file (development), real
-environment variables, and Streamlit secrets (how a deployed app receives its
-key). If a key is found the real model is used; otherwise the app falls back to
-the offline stub so it always runs. This is the single place that decides which
-backend is active.
-"""
+"""Chooses the real client or the stub. The one place that imports Streamlit."""
 
 import os
 

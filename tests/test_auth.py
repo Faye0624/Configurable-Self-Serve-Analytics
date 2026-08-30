@@ -1,4 +1,4 @@
-"""Tests for accounts: registration, login and password handling."""
+"""Passwords not stored in plain text, salted, errors do not leak."""
 
 import pytest
 

@@ -1,4 +1,4 @@
-"""Tests for loading uploaded data into the database (US1, covers TC-1)."""
+"""Storage, table-name sanitising, re-upload replacing."""
 
 import pandas as pd
 import pytest

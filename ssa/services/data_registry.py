@@ -1,3 +1,5 @@
+"""Loads uploaded data into the database and records its structure."""
+
 import re
 from pathlib import Path
 

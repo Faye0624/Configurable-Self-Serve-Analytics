@@ -1,10 +1,4 @@
-"""The animated worked example shown beside the landing page copy.
-
-It replays the product in miniature: a question is typed, the SQL the tool
-would generate appears, then the answer draws itself. It is a self-contained
-HTML component — static content, no database access — so the landing page stays
-instant to load.
-"""
+"""The animated demo on the landing page — embedded HTML/CSS/JS."""
 
 import streamlit as st
 import streamlit.components.v1 as components

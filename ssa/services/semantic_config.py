@@ -1,3 +1,5 @@
+"""Assigns roles and join keys, and suggests likely ones."""
+
 from ssa.models import Column, DatasetTable, Role
 
 

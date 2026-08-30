@@ -1,19 +1,4 @@
-"""Session state for the Streamlit app.
-
-Streamlit re-runs the whole script on every interaction, so the long-lived
-objects are stashed in ``st.session_state`` and reused across reruns:
-
-  * the **catalogue** database (accounts + the list of projects) — one per app;
-  * the signed-in **user**;
-  * the **workspace** for the currently open project — its own database file
-    plus one instance of each service.
-
-Switching project throws the workspace away and builds a new one, so a project's
-data and configuration never leak into another.
-
-This module holds *no analysis logic*: it only wires the ``ssa`` services
-together. All behaviour lives in ``ssa`` (the views stay a thin UI layer).
-"""
+"""Session state; switching project discards the previous workspace."""
 
 from dataclasses import dataclass
 

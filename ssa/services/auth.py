@@ -1,13 +1,4 @@
-"""Accounts: registration and login.
-
-Passwords are never stored. Each account keeps a random per-user salt and a
-PBKDF2-HMAC-SHA256 hash of the password, and login recomputes the hash and
-compares it in constant time. PBKDF2 is in the standard library, so this adds
-no dependency and works the same on a laptop and on a deployed host.
-
-Accounts live in a `_users` table in the same DuckDB file as the projects, so
-one file holds the whole workspace.
-"""
+"""Registration and login with salted hashing; passwords are never stored."""
 
 import hashlib
 import hmac

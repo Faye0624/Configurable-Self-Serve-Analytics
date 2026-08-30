@@ -1,3 +1,5 @@
+"""Decides which analyses a project can run, and what is missing when it cannot."""
+
 from dataclasses import dataclass
 
 from ssa.models import AnalysisTemplate, Project, Role, STANDARD_TEMPLATES

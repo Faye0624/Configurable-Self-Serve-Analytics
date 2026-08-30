@@ -1,10 +1,4 @@
-"""Ask screen — natural-language querying (US15-US18, US22).
-
-Thin UI over ssa.NLQueryEngine: it takes the question, shows the answer + the
-generated SQL (which can be downloaded), surfaces errors for rephrasing, and
-lists past queries that can be re-run straight from their saved SQL (no model
-call). Before the first question it makes clear what is sent to the model.
-"""
+"""The natural-language query screen and history."""
 
 import streamlit as st
 

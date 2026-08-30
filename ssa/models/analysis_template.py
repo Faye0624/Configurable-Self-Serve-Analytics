@@ -1,10 +1,13 @@
+"""Each analysis declares the roles it needs — the unlock rules as data."""
+
 from dataclasses import dataclass
 
 from ssa.models.role import Role
 
 
-# A pre-built analysis and the column roles it needs before it can run.
 @dataclass(frozen=True)
+
+
 class AnalysisTemplate:
     name: str
     # What roles are needed to run the model
@@ -13,11 +16,11 @@ class AnalysisTemplate:
     description: str = ""
 
 
-# The standard analyses the tool ships with.
-# 
-# The descriptions say what each analysis tells you, in the words someone would
-# use to ask for it — no "measure", no "entities". Those are configuration terms
-# and belong in the lock message, where the point is which column to go and set.
+#The standard analyses the tool ships with.
+#-----
+#The descriptions say what each analysis tells you, in the words someone would
+#use to ask for it — no "measure", no "entities". Those are configuration terms
+#and belong in the lock message, where the point is which column to go and set.
 STANDARD_TEMPLATES = [
     AnalysisTemplate(
         "Key metrics", frozenset({Role.MEASURE}),

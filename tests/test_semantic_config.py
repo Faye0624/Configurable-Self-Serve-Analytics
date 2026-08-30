@@ -1,9 +1,4 @@
-"""Tests for the no-code semantic configuration (US6-US8, covers TC-6..8).
-
-The configuration layer is what makes the engine domain-independent: the user
-declares what each column *means* (its role) and which columns link tables
-together, and everything downstream is driven by that.
-"""
+"""Roles and suggestions; the user can always override."""
 
 import pytest
 

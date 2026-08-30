@@ -1,12 +1,4 @@
-"""A real NL->SQL client backed by an OpenAI chat model (optional).
-
-Used only when an API key is configured (see factory.py); otherwise the offline
-stub is used. `openai` is imported lazily so the app runs without the package
-installed as long as this client isn't selected.
-
-Privacy (NFR-2): the prompt contains only the schema text (table/column names,
-types, roles) and the question — never any data rows.
-"""
+"""The real client: sends the request to OpenAI. 0% test coverage by design."""
 
 from ssa.llm.base import LLMClient
 from ssa.llm.schema import Schema

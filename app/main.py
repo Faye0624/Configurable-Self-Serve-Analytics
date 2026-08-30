@@ -1,12 +1,4 @@
-"""Streamlit entry point for the Self-Serve Analytics app.
-
-Run locally from the repo root with:
-    streamlit run app/main.py
-
-Routing has three levels: sign in, pick a project, then work inside it
-(Data / Dashboard / Ask). Every screen lives in ``app/views`` and is a thin UI
-layer over the ``ssa`` services (see ``app/state.py``).
-"""
+"""Routing: sign in, choose a project, then work inside it."""
 
 import os
 import sys

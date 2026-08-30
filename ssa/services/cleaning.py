@@ -1,11 +1,4 @@
-"""Cleaning: propose fixes, apply only what the user approves (US3/US4).
-
-Cleaning is **opt-in**. The service never changes data on its own: it first
-*detects* what could be fixed and reports it (how many rows/columns each fix
-would affect), and only applies the fixes the user explicitly selects. This
-keeps the user in control of their own data — the system explains what it found
-and asks, rather than silently rewriting the upload.
-"""
+"""Detects, applies only what the user approves, and flags what it never fixes."""
 
 from dataclasses import dataclass
 

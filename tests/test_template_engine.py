@@ -1,14 +1,4 @@
-"""Tests for the analysis templates (US12, covers TC-12a/b/c).
-
-These check *correctness of the numbers*, not just that a query runs: the SQL is
-generated from the semantic configuration, so a wrong role mapping or a wrong
-aggregate would show up here.
-
-The fixture data (see conftest) is four orders:
-    c1 buys 10.00 (books, Jan) and 20.00 (toys, Feb)
-    c2 buys 30.00 (books, Jan)
-    c3 buys 40.00 (garden, Mar)
-"""
+"""Whether the numbers are right; counting orders, not joined rows."""
 
 import pytest
 

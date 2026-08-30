@@ -1,9 +1,4 @@
-"""The LLM client interface used by the NL->SQL engine.
-
-Keeping this behind an interface means the engine doesn't care whether the SQL
-comes from an offline rule-based stub (for tests/demos) or a real model — they
-are swapped by configuration.
-"""
+"""The interface that makes the real client and the stub interchangeable."""
 
 from abc import ABC, abstractmethod
 

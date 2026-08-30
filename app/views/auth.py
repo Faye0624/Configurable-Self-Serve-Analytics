@@ -1,9 +1,4 @@
-"""Landing page and account access.
-
-Everything before signing in lives here. The landing view introduces the
-product and offers two ways in; choosing one swaps the left column for that
-form, so the page never navigates away from the introduction.
-"""
+"""Landing page, sign-in and registration."""
 
 import streamlit as st
 

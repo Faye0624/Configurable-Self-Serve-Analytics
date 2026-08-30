@@ -1,18 +1,4 @@
-"""Analysis templates: generate SQL from the semantic configuration (US11/US12).
-
-A template declares the *roles* it needs; this engine finds columns carrying
-those roles and builds the SQL. The roles may live in different tables, in which
-case the tables are joined on a declared shared key — so an analysis unlocks and
-runs even when the data arrived piece by piece across several uploads.
-
-Every method returns ``(sql, result)`` so the UI can show and download the exact
-query behind a number (transparency, US16).
-
-**Join grain.** Joining a table of orders to a table of order lines repeats each
-order once per line. Sums stay correct, but counting rows would over-count
-events, so when tables are joined the engine counts *distinct join keys*
-instead of rows.
-"""
+"""Generates and runs the SQL for each analysis, including across joined tables."""
 
 from dataclasses import dataclass
 

@@ -1,10 +1,13 @@
+"""One column: name, type, role, join key, profiling stats."""
+
 from dataclasses import dataclass, field
 
 from ssa.models.role import Role
 
 
-# One column of a dataset table. each column of the table will create a new column object
 @dataclass
+
+
 class Column:
     # dataclass is init, repr(decide what print will show), eq(decide two object is equal or not)
     name: str

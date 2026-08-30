@@ -1,4 +1,4 @@
-"""Tests for multiple projects (US20): isolation, persistence and deletion."""
+"""Persistence; two projects never see each other's tables."""
 
 import pytest
 

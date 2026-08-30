@@ -1,16 +1,4 @@
-"""UI tests for the two routing decisions the app makes after sign-in.
-
-Everything else is tested at the service level; these run the real Streamlit
-script headlessly (``AppTest``) because the behaviour under test *is* the
-routing — which screen appears, and what the sidebar highlights.
-
-Two notes on driving AppTest:
-  * the element tree it exposes is the one from the first pass of the script,
-    so a widget interacted with before a ``st.rerun()`` cannot be reused
-    afterwards — each block below starts from a fresh ``AppTest``;
-  * ``at.session_state`` is not a plain dict, so use ``in`` and ``[]``
-    rather than ``.get()``.
-"""
+"""Runs the whole app headlessly — routing and navigation."""
 
 import sys
 from pathlib import Path
