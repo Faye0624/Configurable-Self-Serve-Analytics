@@ -24,7 +24,6 @@ def safe_table_name(filename: str) -> str:
     return name
 
 
-# Loads uploaded CSVs into the database and registers them as DatasetTables.
 class DataRegistry:
     def __init__(self, db: Database):
         self._db = db

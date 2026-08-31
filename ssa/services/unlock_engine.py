@@ -45,8 +45,8 @@ class UnlockEngine:
                 results.append(UnlockResult(t, True))
             else:
                 results.append(UnlockResult(t, False,
-                    "Needs data from separate files — mark the column they share "
-                    "as a key in both."))
+                    "Needs data from separate files — mark the linking column as "
+                    "a key in both, giving it the same shared name."))
         return results
 
     # "Needs an amount column (measure)."

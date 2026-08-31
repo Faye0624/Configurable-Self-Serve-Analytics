@@ -12,7 +12,7 @@ class SemanticConfigService:
     DATE_HINTS = ("date", "time", "_at", "timestamp")
 
     # US6: what this column means.
-    def set_role(self, table: DatasetTable, column_name: str, role: Role) -> None:
+    def set_role(s  elf, table: DatasetTable, column_name: str, role: Role) -> None:
         self._find(table, column_name).role = role
 
     # US7: key_name is the shared name matching this table to others.

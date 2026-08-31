@@ -99,6 +99,18 @@ def test_unjoinable_tables_stay_locked(engine):
     assert "separate files" in result.reason and "key" in result.reason
 
 
+# Two files often call the same key different things. What connects them is the
+# shared name the user gives each one, not the column names, which may differ.
+def test_key_columns_with_different_names_connect_through_a_shared_name(engine):
+    project = Project("p", [
+        _table("orders", {"customer_id": Role.IDENTIFIER, "order_date": Role.DATE},
+               join_key=("order_id", "order")),
+        _table("order_items", {"price": Role.MEASURE},
+               join_key=("oid", "order")),          # different column, same label
+    ])
+    assert _result(engine.evaluate(project), "RFM").unlocked is True
+
+
 def test_different_keys_do_not_connect_tables(engine):
     project = Project("p", [
         _table("visits", {"customer_id": Role.IDENTIFIER, "visited_at": Role.DATE},

@@ -238,14 +238,19 @@ def _role_editor(ws: Workspace, table, scope: str) -> None:
     # both in the upload wizard and in the "Uploaded tables" tab, and Streamlit
     # renders every tab, so the keys must differ between the two call sites.
     st.markdown("**Configure — roles & keys**")
-    head = st.columns([3, 3, 2, 4])
+    st.caption(
+        "Tick **Join key** on the column that links this file to another, then give "
+        "it a shared name. **Two files link only when that name is identical in both** "
+        "— even if the columns themselves are called different things."
+    )
+    head = st.columns([3, 3, 3, 3])
     head[0].caption("Column")
     head[1].caption("Role")
     head[2].caption("Join key")
     head[3].caption("Profile")
 
     for col in table.columns:
-        row = st.columns([3, 3, 2, 4])
+        row = st.columns([3, 3, 3, 3])
         row[0].write(f"`{col.name}`")
 
         role = row[1].selectbox(
@@ -257,6 +262,20 @@ def _role_editor(ws: Workspace, table, scope: str) -> None:
             "Join key", value=col.is_join_key,
             key=f"key_{scope}_{table.name}_{col.name}", label_visibility="collapsed",
         )
+        # The name both files use for this key. It defaults to the column's own
+        # name, and is editable because two files often call the same thing
+        # differently — orders.order_id and order_items.oid. Tables join when
+        # this name matches, not when the column names do.
+        key_name = col.key_name or col.name
+        if is_key:
+            key_name = row[2].text_input(
+                "Shared name", value=key_name,
+                key=f"keyname_{scope}_{table.name}_{col.name}",
+                label_visibility="collapsed", placeholder="shared name",
+                help="The name both files use for this key. Two tables link "
+                     "when this name matches in both.",
+            ).strip() or col.name
+
         row[3].caption(
             f"{col.data_type} · {col.null_pct}% null · {col.distinct_count} distinct"
         )
@@ -264,6 +283,6 @@ def _role_editor(ws: Workspace, table, scope: str) -> None:
         # Push the widget values back through the service (US6/US7).
         ws.config.set_role(table, col.name, role)
         if is_key:
-            ws.config.set_join_key(table, col.name, col.key_name or col.name)
+            ws.config.set_join_key(table, col.name, key_name)
         else:
             ws.config.clear_join_key(table, col.name)
