@@ -1,6 +1,6 @@
 """The natural-language query flow; history stores SQL so replay skips the model."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 
 import pandas as pd

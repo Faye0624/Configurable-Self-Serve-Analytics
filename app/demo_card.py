@@ -1,6 +1,5 @@
 """The animated demo on the landing page — embedded HTML/CSS/JS."""
 
-import streamlit as st
 import streamlit.components.v1 as components
 
 QUESTION = "Which category sells the most?"

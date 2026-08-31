@@ -1,6 +1,5 @@
 """Profiling — null percentage, and an empty table not breaking it."""
 
-import numpy as np
 import pandas as pd
 import pytest
 
