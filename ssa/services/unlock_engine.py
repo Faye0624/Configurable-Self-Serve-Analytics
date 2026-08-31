@@ -40,10 +40,13 @@ class UnlockEngine:
         for t in templates:
             missing = t.required_roles - available
             if missing:
+                # Does the project have these roles at all? No -> go and get data.
                 results.append(UnlockResult(t, False, self._missing_reason(missing)))
             elif any(t.required_roles <= roles for roles in clusters):
+                # Yes, and one joinable group holds all of them -> it can run.
                 results.append(UnlockResult(t, True))
             else:
+                # Yes, but scattered across files that don't join -> connect them.
                 results.append(UnlockResult(t, False,
                     "Needs data from separate files — mark the linking column as "
                     "a key in both, giving it the same shared name."))
