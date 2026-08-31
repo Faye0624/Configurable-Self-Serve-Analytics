@@ -47,20 +47,27 @@ class CleaningService:
 
         # --- stray whitespace: which rows, in which columns ---------------- #
         text_cols = _text_columns(df)
+        # true false dataset
         padded = pd.DataFrame(
+            # trip blankspace and compare is different or not compared with before
             {c: df[c].map(lambda v: isinstance(v, str) and v != v.strip())
              for c in text_cols},
             index=df.index,
         )
+        # show problem column such as['city', 'cournty']
         affected_cols = [c for c in text_cols if padded[c].any()] if len(text_cols) else []
+        # axis=1 show which row should show to user
         if affected_cols:
             mask = padded[affected_cols].any(axis=1)
             evidence = df.loc[mask, affected_cols].head(self.MAX_EVIDENCE_ROWS).copy()
             # show the padding explicitly, otherwise it is invisible in a table
             for c in affected_cols:
+                # add [] in order to show blank
                 evidence[c] = evidence[c].map(
                     lambda v: f"[{v}]" if isinstance(v, str) else v)
+            # add row number in front of blank data row
             evidence.insert(0, "row", evidence.index)
+            #  count true
             n_rows = int(mask.sum())
             options.append(CleaningOption(
                 TRIM_WHITESPACE,
@@ -112,11 +119,13 @@ class CleaningService:
 
     # --- 3. flag: problems to review, never auto-fixed (US4) --------------- #
     def flag_suspicious(self, df: pd.DataFrame) -> list[str]:
+        # the issue that in one dataset will store in this set together after run this function
         issues: list[str] = []
         n = len(df)
         for c in df.columns:
             s = df[c]
 
+            # count null in column
             null_pct = round(float(s.isna().mean()) * 100, 1) if n else 0.0
             if null_pct >= self.MISSING_THRESHOLD:
                 issues.append(f"{c} — {null_pct}% of values are missing")
@@ -125,7 +134,7 @@ class CleaningService:
             if s.dtype == object and s.dropna().map(type).nunique() > 1:
                 issues.append(f"{c} — mixed data types in the same column")
 
-            # Numeric values far outside the interquartile range.
+            # IQR, Numeric values far outside the interquartile range.
             if pd.api.types.is_numeric_dtype(s):
                 vals = s.dropna()
                 if len(vals) >= 4:
