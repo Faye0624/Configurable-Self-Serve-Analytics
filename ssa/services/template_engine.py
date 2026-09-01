@@ -11,22 +11,55 @@ from ssa.models import Column, DatasetTable, Project, Role
 @dataclass
 class _Plan:
     """How to reach a set of roles: a FROM clause plus qualified column names."""
-
+   
+    #FROM /join in sql
     from_sql: str
-    refs: dict[Role, str]          # role -> "table"."column"
-    join_key: str | None = None    # qualified join key, set when tables are joined
+    # role -> "table"."column"                   
+    refs: dict[Role, str]          
+     # qualified join key, set when tables are joined
+    join_key: str | None = None   
 
     @property
     def is_joined(self) -> bool:
         return self.join_key is not None
 
 
-def _find_role(project: Project, role: Role) -> tuple[DatasetTable | None, Column | None]:
-    """First (table, column) carrying the role, else (None, None)."""
+def columns_for_role(project: Project, role: Role) -> list[str]:
+    """Every column carrying the role, as "table.column" — the choices a user has."""
+    return [f"{t.name}.{c.name}" for t in project.tables
+            for c in t.columns if c.role == role]
+
+
+def resolved_columns(project: Project, roles: list[Role],
+                     chosen: dict[Role, str] | None = None) -> dict[Role, str]:
+    """Which column each role will actually be read from — what a card should say.
+
+    The interface shows this so the choice is never invisible; the rule lives
+    here so the interface never has to reproduce it.
+    """
+    out: dict[Role, str] = {}
+    for role in roles:
+        table, column = _find_role(project, role, (chosen or {}).get(role))
+        if column is not None:
+            out[role] = f"{table.name}.{column.name}"
+    return out
+
+
+def _find_role(project: Project, role: Role,
+               prefer: str | None = None) -> tuple[DatasetTable | None, Column | None]:
+    """The (table, column) to use for a role.
+
+    Defaults to the first column carrying it. ``prefer`` ("table.column") picks a
+    specific one, which matters when a dataset has two of the same kind — a price
+    and a quantity are both measures, and the engine must not choose in silence.
+    """
     for table in project.tables:
         for column in table.columns:
             if column.role == role:
-                return table, column
+                if prefer is None or f"{table.name}.{column.name}" == prefer:
+                    return table, column
+    if prefer is not None:            # the pick has gone (column renamed/removed)
+        return _find_role(project, role)
     return None, None
 
 
@@ -39,11 +72,17 @@ def _shared_key(left: DatasetTable, right: DatasetTable):
     return None
 
 
-def _build_plan(project: Project, roles: list[Role]) -> _Plan:
-    """Resolve roles to columns and join their tables together if needed."""
+def _build_plan(project: Project, roles: list[Role],
+                chosen: dict[Role, str] | None = None) -> _Plan:
+    """Resolve roles to columns and join their tables together if needed.
+
+    ``chosen`` maps a role to the "table.column" the user picked for it; roles
+    left out fall back to the first column carrying them.
+    """
+    chosen = chosen or {}
     picks: dict[Role, tuple[DatasetTable, Column]] = {}
     for role in roles:
-        table, column = _find_role(project, role)
+        table, column = _find_role(project, role, chosen.get(role))
         if column is None:
             raise ValueError(f"this analysis needs a column with the '{role}' role")
         picks[role] = (table, column)
@@ -87,12 +126,13 @@ class TemplateEngine:
 
     # Key metrics: total / average / count of a measure, split by a dimension
     # when one is available and reachable.
-    def run_key_metrics(self, project: Project) -> tuple[str, pd.DataFrame]:
+    def run_key_metrics(self, project: Project,
+                        chosen: dict[Role, str] | None = None) -> tuple[str, pd.DataFrame]:
         try:                                  # prefer a breakdown by dimension
-            plan = _build_plan(project, [Role.MEASURE, Role.DIMENSION])
+            plan = _build_plan(project, [Role.MEASURE, Role.DIMENSION], chosen)
             dimension = plan.refs[Role.DIMENSION]
         except ValueError:                    # no dimension, or not joinable
-            plan = _build_plan(project, [Role.MEASURE])
+            plan = _build_plan(project, [Role.MEASURE], chosen)
             dimension = None
 
         measure = plan.refs[Role.MEASURE]
@@ -110,8 +150,9 @@ class TemplateEngine:
 
     # Cohort retention: group entities by the month of their first activity,
     # then count how many are still active N months later.
-    def run_cohort(self, project: Project) -> tuple[str, pd.DataFrame]:
-        plan = _build_plan(project, [Role.IDENTIFIER, Role.DATE])
+    def run_cohort(self, project: Project,
+                   chosen: dict[Role, str] | None = None) -> tuple[str, pd.DataFrame]:
+        plan = _build_plan(project, [Role.IDENTIFIER, Role.DATE], chosen)
         entity, date = plan.refs[Role.IDENTIFIER], plan.refs[Role.DATE]
         sql = (
             f'WITH events AS (\n'
@@ -136,8 +177,9 @@ class TemplateEngine:
     # RFM: per entity, Recency (days since last activity, measured against the
     # dataset's latest date so it stays reproducible), Frequency (# activities)
     # and Monetary (total), each scored 1-5 with ntile.
-    def run_rfm(self, project: Project) -> tuple[str, pd.DataFrame]:
-        plan = _build_plan(project, [Role.IDENTIFIER, Role.DATE, Role.MEASURE])
+    def run_rfm(self, project: Project,
+                chosen: dict[Role, str] | None = None) -> tuple[str, pd.DataFrame]:
+        plan = _build_plan(project, [Role.IDENTIFIER, Role.DATE, Role.MEASURE], chosen)
         entity = plan.refs[Role.IDENTIFIER]
         date = plan.refs[Role.DATE]
         amount = plan.refs[Role.MEASURE]

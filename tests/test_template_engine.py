@@ -3,12 +3,38 @@
 import pytest
 
 from ssa.models import Project, Role
-from ssa.services import TemplateEngine
+from ssa.services import TemplateEngine, columns_for_role, resolved_columns
 
 
 @pytest.fixture
 def engine(db):
     return TemplateEngine(db)
+
+
+# --- choosing between two columns of the same role --------------------------- #
+# A price and a quantity are both measures. The engine must use the one the user
+# picked, and must be able to say which one that was.
+def test_a_second_measure_is_only_used_when_it_is_chosen(engine, configured_project):
+    table = configured_project.tables[0]
+    table.columns.append(type(table.columns[0])("order_id", "int64", role=Role.MEASURE))
+
+    assert columns_for_role(configured_project, Role.MEASURE) == [
+        "orders.price", "orders.order_id"]
+
+    _, default = engine.run_key_metrics(configured_project)
+    _, picked = engine.run_key_metrics(
+        configured_project, {Role.MEASURE: "orders.order_id"})
+
+    assert default["total"].sum() == 100.0      # the prices
+    assert picked["total"].sum() == 10.0        # order ids 1+2+3+4
+    assert resolved_columns(configured_project, [Role.MEASURE],
+                            {Role.MEASURE: "orders.order_id"}) == {
+        Role.MEASURE: "orders.order_id"}
+
+
+def test_a_pick_that_no_longer_exists_falls_back_to_the_first(engine, configured_project):
+    _, result = engine.run_key_metrics(configured_project, {Role.MEASURE: "orders.gone"})
+    assert result["total"].sum() == 100.0
 
 
 # --- key metrics (TC-12a) ---------------------------------------------------- #

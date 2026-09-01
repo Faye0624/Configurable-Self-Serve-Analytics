@@ -68,25 +68,31 @@ class UnlockEngine:
     # each group (a group = tables you can join together).
     def _cluster_roles(self, project: Project) -> list[set[Role]]:
         tables = project.tables
+
+        # Every table starts in a group of its own.
         parent = list(range(len(tables)))
 
+        # Which group is table i in? Follow parent to the top.
         def find(i: int) -> int:
             while parent[i] != i:
-                parent[i] = parent[parent[i]]
+                parent[i] = parent[parent[i]]   # shorten the chain on the way up
                 i = parent[i]
             return i
 
-        # Union tables that declare the same key name.
+        # 1. Raw links: tables declaring the same key name. Pairs, not groups.
         key_to_tables: dict[str, list[int]] = {}
         for idx, tbl in enumerate(tables):
             for col in tbl.columns:
                 if col.is_join_key:
                     key_to_tables.setdefault(col.key_name, []).append(idx)
+
+        # 2. Pairs -> groups. Untouched tables stay on their own; because find()
+        #    walks to the top, A-B and B-C puts A, B and C in one group.
         for idxs in key_to_tables.values():
             for other in idxs[1:]:
                 parent[find(other)] = find(idxs[0])
 
-        # Collect the roles present in each connected group.
+        # 3. Pool each group's roles — what an analysis can actually reach.
         clusters: dict[int, set[Role]] = {}
         for idx, tbl in enumerate(tables):
             roles = clusters.setdefault(find(idx), set())
