@@ -3,7 +3,7 @@
 import pytest
 
 from ssa.models import Project, Role
-from ssa.services import TemplateEngine, columns_for_role, resolved_columns
+from ssa.services import TemplateEngine, columns_for_role
 
 
 @pytest.fixture
@@ -27,9 +27,6 @@ def test_a_second_measure_is_only_used_when_it_is_chosen(engine, configured_proj
 
     assert default["total"].sum() == 100.0      # the prices
     assert picked["total"].sum() == 10.0        # order ids 1+2+3+4
-    assert resolved_columns(configured_project, [Role.MEASURE],
-                            {Role.MEASURE: "orders.order_id"}) == {
-        Role.MEASURE: "orders.order_id"}
 
 
 def test_a_pick_that_no_longer_exists_falls_back_to_the_first(engine, configured_project):

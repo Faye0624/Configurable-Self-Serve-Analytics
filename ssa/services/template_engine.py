@@ -30,21 +30,6 @@ def columns_for_role(project: Project, role: Role) -> list[str]:
             for c in t.columns if c.role == role]
 
 
-def resolved_columns(project: Project, roles: list[Role],
-                     chosen: dict[Role, str] | None = None) -> dict[Role, str]:
-    """Which column each role will actually be read from — what a card should say.
-
-    The interface shows this so the choice is never invisible; the rule lives
-    here so the interface never has to reproduce it.
-    """
-    out: dict[Role, str] = {}
-    for role in roles:
-        table, column = _find_role(project, role, (chosen or {}).get(role))
-        if column is not None:
-            out[role] = f"{table.name}.{column.name}"
-    return out
-
-
 def _find_role(project: Project, role: Role,
                prefer: str | None = None) -> tuple[DatasetTable | None, Column | None]:
     """The (table, column) to use for a role.

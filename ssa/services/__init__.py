@@ -4,7 +4,7 @@ from ssa.services.profiling import ProfilingService
 from ssa.services.cleaning import CleaningService, CleaningOption
 from ssa.services.semantic_config import SemanticConfigService
 from ssa.services.unlock_engine import UnlockEngine, UnlockResult
-from ssa.services.template_engine import TemplateEngine, columns_for_role, resolved_columns
+from ssa.services.template_engine import TemplateEngine, columns_for_role
 from ssa.services.sql_guard import SqlGuard, SqlGuardError
 from ssa.services.nl_query import NLQueryEngine, QueryResult, HistoryEntry
 from ssa.services.project_store import ProjectStore
@@ -22,7 +22,6 @@ __all__ = [
     "UnlockResult",
     "TemplateEngine",
     "columns_for_role",
-    "resolved_columns",
     "SqlGuard",
     "SqlGuardError",
     "NLQueryEngine",
