@@ -12,14 +12,17 @@ from state import Workspace, get_workspace
 # grouping dimension.
 _METRIC_COLS = {"total", "average", "n"}
 
-# Plain words for the roles, for the picker and the "reading" line on each card.
 _METRIC_ROLES = (Role.MEASURE, Role.DIMENSION)
 
+# Labels for the column pickers. The role's own name leads, so it matches the
+# role editor on the Data screen; the bracket explains what that word means.
+# "Identifier" stays deliberately vague — it can be a customer, a product or a
+# store, and naming it "customer" would write one domain into the interface.
 _ROLE_WORDS = {
-    Role.MEASURE: "Amount",
+    Role.MEASURE: "Measure (amount)",
     Role.DATE: "Date",
-    Role.IDENTIFIER: "Customer",
-    Role.DIMENSION: "Category",
+    Role.IDENTIFIER: "Identifier (who or what)",
+    Role.DIMENSION: "Dimension (category)",
 }
 
 
