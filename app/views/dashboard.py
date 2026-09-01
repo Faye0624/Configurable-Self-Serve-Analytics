@@ -5,7 +5,7 @@ import streamlit as st
 import charts
 from formatting import pretty_sql
 from ssa.models import Role
-from ssa.services import columns_for_role, resolved_columns
+from ssa.services import columns_for_role
 from state import Workspace, get_workspace
 
 # Columns the key-metrics query always returns; anything else in front is the
@@ -13,6 +13,8 @@ from state import Workspace, get_workspace
 _METRIC_COLS = {"total", "average", "n"}
 
 # Plain words for the roles, for the picker and the "reading" line on each card.
+_METRIC_ROLES = (Role.MEASURE, Role.DIMENSION)
+
 _ROLE_WORDS = {
     Role.MEASURE: "Amount",
     Role.DATE: "Date",
@@ -31,10 +33,11 @@ def render() -> None:
 
     results = ws.unlock.evaluate(ws.project)  # US9/US10
 
-    chosen = _column_picker(ws)
-
-    # Run key metrics once up front so the filter bar knows the categories.
-    m_sql, m_df, m_dim, m_error = _run_key_metrics(ws, results, chosen)
+    # Key metrics runs before the cards because the filter bar needs its
+    # categories, so its picks are read from state rather than from the widget,
+    # which is drawn later inside the card.
+    m_chosen = _picks_from_state(ws, "metrics", _METRIC_ROLES)
+    m_sql, m_df, m_dim, m_error = _run_key_metrics(ws, results, m_chosen)
     top_n, selected = _filter_bar(m_df, m_dim)
 
     st.divider()
@@ -45,13 +48,13 @@ def render() -> None:
                 if not result.unlocked:
                     _locked_card(result)
                 elif result.template.name == "Key metrics":
-                    _metrics_card(ws, m_sql, m_df, m_dim, m_error, top_n, selected, chosen)
+                    _metrics_card(ws, m_sql, m_df, m_dim, m_error, top_n, selected)
                 elif result.template.name == "Cohort / retention":
                     _template_card(ws, result, ws.templates.run_cohort, _draw_cohort,
-                                   chosen, [Role.IDENTIFIER, Role.DATE])
+                                   "cohort", [Role.IDENTIFIER, Role.DATE])
                 elif result.template.name == "RFM":
                     _template_card(ws, result, ws.templates.run_rfm, _draw_rfm,
-                                   chosen, [Role.IDENTIFIER, Role.DATE, Role.MEASURE])
+                                   "rfm", [Role.IDENTIFIER, Role.DATE, Role.MEASURE])
 
     # Always shown, even when nothing is locked: with only three analyses today
     # an empty board looks finished, and this is what says it is not — more data
@@ -66,35 +69,48 @@ def render() -> None:
 # --------------------------------------------------------------------------- #
 # Which column to read for each role
 # --------------------------------------------------------------------------- #
-def _column_picker(ws: Workspace) -> dict:
-    """Ask which column to use wherever a role has more than one candidate.
+def _card_header(title: str, df, key: str) -> None:
+    """The card's title, with the CSV download as an icon on the right.
 
-    A price and a quantity are both amounts. Left alone the engine reads
-    whichever came first in the file, which is a choice the user never made and
-    cannot see, so the choice is handed back to them.
+    The download sat under each chart as a full-width button, which read as
+    part of the analysis rather than an action on it.
     """
-    multi = {}
-    for role in (Role.MEASURE, Role.DATE, Role.IDENTIFIER, Role.DIMENSION):
-        options = columns_for_role(ws.project, role)
-        if len(options) > 1:
-            multi[role] = options
-    if not multi:
-        return {}
+    left, right = st.columns([5, 1], vertical_alignment="center")
+    left.markdown(f"**{title}**")
+    if df is not None:
+        right.download_button(
+            "", df.to_csv(index=False), file_name=f"{key}_result.csv",
+            mime="text/csv", key=f"dl_{key}", icon=":material/download:",
+            help="Download this result as CSV",
+        )
 
-    st.caption("Your data offers more than one column for these — choose which to analyse.")
+
+def _pick_key(ws: Workspace, card: str, role: Role) -> str:
+    return f"pick_{ws.project.id}_{card}_{role}"
+
+
+def _column_pickers(ws: Workspace, card: str, roles) -> dict:
+    """One dropdown per role, naming the column that card reads it from.
+
+    Always shown, even with a single candidate: a price and a quantity are both
+    amounts, and left alone the engine would read whichever came first — a
+    choice the user never made and could only discover by reading the SQL.
+    Each card picks independently, so one analysis can total revenue while
+    another counts units.
+    """
     chosen = {}
-    for column, (role, options) in zip(st.columns(len(multi)), multi.items()):
-        chosen[role] = column.selectbox(
-            _ROLE_WORDS[role], options, key=f"pick_{ws.project.id}_{role}")
+    for role in roles:
+        options = columns_for_role(ws.project, role)
+        if options:
+            chosen[role] = st.selectbox(_ROLE_WORDS[role], options,
+                                        key=_pick_key(ws, card, role))
     return chosen
 
 
-def _reading_caption(ws: Workspace, roles, chosen) -> None:
-    """Name the columns behind the numbers, so the choice is never invisible."""
-    used = resolved_columns(ws.project, roles, chosen)
-    if used:
-        st.caption("Reading " + ", ".join(
-            f"{_ROLE_WORDS[r].lower()} from `{ref}`" for r, ref in used.items()))
+def _picks_from_state(ws: Workspace, card: str, roles) -> dict:
+    """The picks a card's dropdowns already hold, before they are drawn again."""
+    return {role: st.session_state[key] for role in roles
+            if (key := _pick_key(ws, card, role)) in st.session_state}
 
 
 # --------------------------------------------------------------------------- #
@@ -130,9 +146,9 @@ def _run_key_metrics(ws: Workspace, results, chosen=None):
     return sql, df, dim, None
 
 
-def _metrics_card(ws, sql, df, dim, error, top_n, selected, chosen):
-    st.markdown("**Key metrics**")
-    _reading_caption(ws, [Role.MEASURE, Role.DIMENSION], chosen)
+def _metrics_card(ws, sql, df, dim, error, top_n, selected):
+    _card_header("Key metrics", df, "metrics")
+    _column_pickers(ws, "metrics", _METRIC_ROLES)
     if error:
         st.error(error)
         return
@@ -151,22 +167,28 @@ def _metrics_card(ws, sql, df, dim, error, top_n, selected, chosen):
         c3.metric("Rows", f"{int(row['n']):,}")
         st.caption("Assign a **dimension** role to a column to see a breakdown.")
 
-    _sql_and_download(sql, df, "metrics")
+    _show_sql(sql)
 
 
 # --------------------------------------------------------------------------- #
 # Cohort / RFM cards (share the run → draw → SQL/download shape)
 # --------------------------------------------------------------------------- #
-def _template_card(ws, result, run, draw, chosen=None, roles=()) -> None:
-    st.markdown(f"**{result.template.name}**")
-    _reading_caption(ws, roles, chosen)
+def _template_card(ws, result, run, draw, card: str, roles) -> None:
+    # The header carries the download, which needs the result — so its place is
+    # reserved first and filled once the query has run.
+    header = st.container()
+    chosen = _column_pickers(ws, card, roles)
     try:
         sql, df = run(ws.project, chosen)
     except Exception as exc:
+        with header:
+            _card_header(result.template.name, None, card)
         st.error(str(exc))
         return
+    with header:
+        _card_header(result.template.name, df, card)
     draw(df)
-    _sql_and_download(sql, df, result.template.name.split()[0].lower())
+    _show_sql(sql)
 
 
 def _draw_cohort(df) -> None:
@@ -197,11 +219,7 @@ def _locked_card(result) -> None:
     st.warning(result.reason)  # US10: why it's locked
 
 
-def _sql_and_download(sql: str, df, key: str) -> None:
-    """Show the generated SQL and let the result be downloaded (US16/US21 groundwork)."""
+def _show_sql(sql: str) -> None:
+    """The query behind the numbers, always available (US16)."""
     with st.expander("Show SQL"):
         st.code(pretty_sql(sql), language="sql", wrap_lines=True)
-    st.download_button(
-        "Download result (CSV)", df.to_csv(index=False),
-        file_name=f"{key}_result.csv", mime="text/csv", key=f"dl_{key}",
-    )
