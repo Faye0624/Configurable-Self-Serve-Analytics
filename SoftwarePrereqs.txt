@@ -11,7 +11,7 @@ Project type        Python web application (Streamlit)
 IDE                 Visual Studio Code
 Language            Python 3.13
 Framework           Streamlit 1.60.0
-Database            DuckDB 1.5.4  — embedded; no database server to install
+Database            DuckDB 1.5.5  — embedded; no database server to install
 JavaScript          none (one small inline HTML/CSS/JS component on the landing page)
 Version control     Git (GitLab, with GitHub used for deployment)
 Deployment          Streamlit Community Cloud
@@ -23,33 +23,41 @@ KEY SUPPORTING PACKAGES
 package          version    what it is used for
 -------          -------    -------------------
 streamlit        1.60.0     web interface
-duckdb           1.5.4      embedded analytical database: stores uploaded
+duckdb           1.5.5      embedded analytical database: stores uploaded
                             tables and runs the generated SQL
-pandas           2.3.3      CSV loading, profiling and light data handling
+pandas           3.0.5      CSV loading, profiling and light data handling
 plotly           6.9.0      dashboard charts
-sqlglot          30.14.0    parses generated SQL so it can be validated as
+sqlglot          30.15.0    parses generated SQL so it can be validated as
                             read-only before it reaches the database
 openai           2.53.0     optional — the natural-language-to-SQL client.
                             Without an API key the app falls back to an
                             offline stub and still runs in full
-python-dotenv    1.x        optional — reads the API key from a local .env
+python-dotenv    1.2.2      optional — reads the API key from a local .env
 pytest           9.1.1      test suite
-pytest-cov       latest     coverage reporting (development only)
+pytest-cov       7.1.0      coverage reporting (development only)
 
-The authoritative list is requirements.txt in the root of the archive.
+Two dependency files are provided:
+  requirements.txt        minimum versions — what the code needs
+  requirements-lock.txt   exact versions — the environment it was developed
+                          and tested in (output of `pip freeze`)
 
 
 HOW TO RUN IT
 =============
 
-1. Python 3.13 is required (3.10 or newer will work).
+1. Python 3.10 or newer; developed and tested on 3.13.
 
 2. From the project root, create and activate a virtual environment:
 
        python -m venv .venv
        source .venv/bin/activate          # Windows: .venv\Scripts\activate
 
-3. Install the dependencies:
+3. Install the dependencies. For an exact reproduction of the tested
+   environment, use the lock file:
+
+       pip install -r requirements-lock.txt
+
+   Or, to allow newer compatible versions:
 
        pip install -r requirements.txt
 
