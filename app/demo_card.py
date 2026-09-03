@@ -1,6 +1,6 @@
 """The animated demo on the landing page — embedded HTML/CSS/JS."""
 
-import streamlit.components.v1 as components
+import streamlit as st
 
 QUESTION = "Which category sells the most?"
 SQL = "SELECT category, SUM(price) AS total\nFROM orders GROUP BY category"
@@ -99,4 +99,4 @@ setTimeout(play, 1400);
 
 
 def render() -> None:
-    components.html(_HTML, height=HEIGHT)
+    st.iframe(_HTML, height=HEIGHT)

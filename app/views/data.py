@@ -2,7 +2,6 @@
 
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
 
 from ssa.models import Role
 from ssa.services import safe_table_name
@@ -42,7 +41,7 @@ def _scroll_to_top_if_requested() -> None:
     """
     if not st.session_state.pop("scroll_to_top", False):
         return
-    components.html(
+    st.iframe(
         """
         <script>
         const toTop = () => {
