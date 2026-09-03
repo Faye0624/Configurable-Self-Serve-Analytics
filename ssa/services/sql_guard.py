@@ -46,7 +46,7 @@ class SqlGuard:
                     f"'{type(node).__name__}' operations are not allowed (read-only)"
                 )
 
-        # Table references must be known not middle files. CTE names are local, not real tables.
+        # Table references must be known. CTE names are local, not real tables.
         cte_names = {cte.alias_or_name for cte in statement.find_all(exp.CTE)}
         for table in statement.find_all(exp.Table):
             if table.name and table.name not in allowed_tables and table.name not in cte_names:
