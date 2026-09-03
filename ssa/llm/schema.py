@@ -10,12 +10,12 @@ _SQL_TYPES = {"object": "TEXT", "string": "TEXT", "bool": "BOOLEAN",
               "datetime": "TIMESTAMP", "date": "DATE", "int": "BIGINT",
               "float": "DOUBLE"}
 
-
+# dtype translator
 def _sql_type(dtype: str) -> str:
     d = dtype.lower()
     return next((sql for key, sql in _SQL_TYPES.items() if key in d), "TEXT")
 
-
+# once build never change
 @dataclass(frozen=True)
 class SchemaColumn:
     name: str
@@ -32,7 +32,7 @@ class SchemaTable:
 @dataclass(frozen=True)
 class Schema:
     tables: tuple[SchemaTable, ...]
-
+    #  use as white for sql_guard
     def table_names(self) -> set[str]:
         return {t.name for t in self.tables}
 

@@ -1,5 +1,5 @@
 """Session state; switching project discards the previous workspace."""
-
+  # streamlit will completely rerun after every click, this is only way to remember
 from dataclasses import dataclass
 
 import streamlit as st
@@ -116,6 +116,7 @@ def get_workspace() -> Workspace | None:
         return None
 
     # The project's own database holds its tables and its query history.
+  
     db = store.open_data_db(project)
     registry = DataRegistry(db)
     registry.tables = {t.name: t for t in project.tables}

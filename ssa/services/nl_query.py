@@ -63,6 +63,8 @@ class NLQueryEngine:
         return build_schema(project).to_prompt_text()
 
     # US15/US16: answer a natural-language question.
+    # ask()-build schema-llm generate-guard-execute-record
+    # rerun()-build schema-guard-excute
     def ask(self, project, question: str) -> QueryResult:
         schema = build_schema(project)
 
@@ -71,14 +73,17 @@ class NLQueryEngine:
                 self._limiter.check()
             except Exception as exc:
                 return QueryResult(question, error=str(exc))
-
+       
+        # LLM
         try:
             raw_sql = self._llm.generate_sql(question, schema)
         except Exception as exc:
             return QueryResult(question, error=f"the model could not produce SQL: {exc}")
         if self._limiter is not None:
+            # only record when is succussfull
             self._limiter.record()
 
+        # sql_guard
         try:
             safe_sql = self._guard.validate(raw_sql, schema.table_names())
         except SqlGuardError as exc:

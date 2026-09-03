@@ -23,21 +23,15 @@ class _Plan:
     def is_joined(self) -> bool:
         return self.join_key is not None
 
-
+# for UI, the choices a user has, save as chosen
 def columns_for_role(project: Project, role: Role) -> list[str]:
-    """Every column carrying the role, as "table.column" — the choices a user has."""
     return [f"{t.name}.{c.name}" for t in project.tables
             for c in t.columns if c.role == role]
 
 
+# pick a column for a role, if user did not choose column, use the first one
 def _find_role(project: Project, role: Role,
                prefer: str | None = None) -> tuple[DatasetTable | None, Column | None]:
-    """The (table, column) to use for a role.
-
-    Defaults to the first column carrying it. ``prefer`` ("table.column") picks a
-    specific one, which matters when a dataset has two of the same kind — a price
-    and a quantity are both measures, and the engine must not choose in silence.
-    """
     for table in project.tables:
         for column in table.columns:
             if column.role == role:
@@ -47,9 +41,8 @@ def _find_role(project: Project, role: Role,
         return _find_role(project, role)
     return None, None
 
-
+# decide if two table can join or not, find two exact same key_name.exact pair of columns to pair tow table
 def _shared_key(left: DatasetTable, right: DatasetTable):
-    """The pair of columns joining two tables, if they declare the same key."""
     left_keys = {c.key_name: c for c in left.columns if c.is_join_key}
     for column in right.columns:
         if column.is_join_key and column.key_name in left_keys:
@@ -66,11 +59,14 @@ def _build_plan(project: Project, roles: list[Role],
     """
     chosen = chosen or {}
     picks: dict[Role, tuple[DatasetTable, Column]] = {}
+   
+    # find column name of the role that needed in analyse
     for role in roles:
         table, column = _find_role(project, role, chosen.get(role))
         if column is None:
             raise ValueError(f"this analysis needs a column with the '{role}' role")
         picks[role] = (table, column)
+        # save as object
 
     tables: list[DatasetTable] = []
     for table, _ in picks.values():
@@ -81,10 +77,12 @@ def _build_plan(project: Project, roles: list[Role],
     from_sql = f'"{base.name}"'
     joined = [base]
     join_key = None
-
+   
+    # find table that include the roles
     for table in tables[1:]:
         pair, left_table = None, None
         for candidate in joined:
+            # find two paired column
             pair = _shared_key(candidate, table)
             if pair:
                 left_table = candidate
@@ -94,6 +92,7 @@ def _build_plan(project: Project, roles: list[Role],
                 f"'{base.name}' and '{table.name}' hold the columns this analysis "
                 "needs but are not connected — declare a shared join key on both"
             )
+        # break pair into two separate column in order to write sql
         left_col, right_col = pair
         left_ref = f'"{left_table.name}"."{left_col.name}"'
         from_sql += (f' JOIN "{table.name}" ON {left_ref} = '

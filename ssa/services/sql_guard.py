@@ -29,11 +29,12 @@ class SqlGuard:
             statements = [s for s in sqlglot.parse(sql, dialect="duckdb") if s]
         except Exception as exc:
             raise SqlGuardError(f"could not parse SQL: {exc}") from exc
-
+        #  Defense ‘SELECT 1; DROP TABLE orders’
         if len(statements) != 1:
             raise SqlGuardError("only a single statement is allowed")
         statement = statements[0]
-
+        
+        # top must be SELECT or UNION
         if not isinstance(statement, _READ_ONLY_TOP):
             kind = type(statement).__name__.upper()
             raise SqlGuardError(f"only read-only SELECT queries are allowed, not {kind}")
@@ -45,7 +46,7 @@ class SqlGuard:
                     f"'{type(node).__name__}' operations are not allowed (read-only)"
                 )
 
-        # Table references must be known. CTE names are local, not real tables.
+        # Table references must be known not middle files. CTE names are local, not real tables.
         cte_names = {cte.alias_or_name for cte in statement.find_all(exp.CTE)}
         for table in statement.find_all(exp.Table):
             if table.name and table.name not in allowed_tables and table.name not in cte_names:

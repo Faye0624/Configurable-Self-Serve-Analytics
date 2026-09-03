@@ -1,5 +1,5 @@
 """An offline rule-based client — every test runs against it."""
-
+# for testing, reproducibility, also baseline
 import re
 
 from ssa.llm.base import LLMClient

@@ -5,7 +5,7 @@ import os
 from ssa.llm.base import LLMClient
 from ssa.llm.stub import StubLLMClient
 
-
+# three situation, have key and openai, without key(use stub), have key without openai
 def build_default_client() -> LLMClient:
     _load_dotenv_if_present()
     api_key = _setting("OPENAI_API_KEY")
