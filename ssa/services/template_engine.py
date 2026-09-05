@@ -1,5 +1,4 @@
 """Generates and runs the SQL for each analysis, including across joined tables."""
-
 from dataclasses import dataclass
 
 import pandas as pd
@@ -49,7 +48,7 @@ def _shared_key(left: DatasetTable, right: DatasetTable):
             return left_keys[column.key_name], column
     return None
 
-
+# generate FROM in the sql
 def _build_plan(project: Project, roles: list[Role],
                 chosen: dict[Role, str] | None = None) -> _Plan:
     """Resolve roles to columns and join their tables together if needed.
