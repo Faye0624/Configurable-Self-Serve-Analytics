@@ -39,8 +39,15 @@ class StubLLMClient(LLMClient):
                 dimension = col          # otherwise "by X" is the grouping column
 
         # An aggregation needs a measure; fall back to the first one available.
+        # If the chosen table has none, move to the first table that does —
+        # otherwise the SQL would read SUM("None") and fail to bind.
         if agg in ("SUM", "AVG") and measure is None:
             measure = self._first(table, Role.MEASURE)
+            if measure is None:
+                for other in schema.tables:
+                    if self._first(other, Role.MEASURE):
+                        table, measure = other, self._first(other, Role.MEASURE)
+                        break
         # A bare measure question ("total sales") with no verb defaults to a total.
         if agg is None and measure and dimension is None:
             agg = "SUM"
@@ -49,7 +56,7 @@ class StubLLMClient(LLMClient):
         limit = int(limit_match.group(1)) if limit_match else None
 
         sql = self._build(table.name, agg, measure, dimension)
-        if limit:
+        if limit and " LIMIT " not in sql:      # the preview fallback already has one
             sql += f" LIMIT {limit}"
         return sql
 
