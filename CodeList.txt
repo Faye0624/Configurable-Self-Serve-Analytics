@@ -14,7 +14,7 @@ own work. It holds the ideas the project is about: the semantic roles, the
 progressive-unlock rules, the SQL generation, and the read-only validation of
 generated queries. I can explain and defend any of it in detail.
 
-AI assistance was used in three places.
+AI assistance was used in two supporting areas.
 
   The interface (app/) goes beyond what the taught material covers — a
   themed dark interface, a staggered landing-page entrance, and an animated
@@ -22,16 +22,14 @@ AI assistance was used in three places.
   should do, show and say, and revised it repeatedly; AI assistance produced
   and refined the implementation from those decisions.
 
-  The test suite (tests/) needed breadth rather than depth: normal paths,
-  boundaries, error handling and invariants across every service. I specified
-  what each area had to guarantee and reviewed the result; AI assistance was
-  used to generate cases and to find gaps in coverage. I added tests myself
-  for defects found during development.
-
-  The evaluation scripts (evaluation/) were produced from my specification: I
-  defined the question categories, what counts as a correct answer and the
-  two clients to compare; AI assistance helped write the questions, the
-  reference SQL and the script that runs and grades them.
+  Testing and evaluation (tests/, evaluation/) needed breadth rather than
+  depth: normal paths, boundaries, error handling and invariants across every
+  service, plus the natural-language benchmark. I specified what each area had
+  to guarantee and reviewed the result; AI assistance was used to generate
+  cases, to find gaps in coverage, and to draft the benchmark questions,
+  reference SQL and grading script to my specification (the question
+  categories and marking rules are mine). I added tests myself for defects
+  found during development.
 
 I am able to explain the AI-assisted code as well — the attribution reflects
 who produced it, not what I understand.
