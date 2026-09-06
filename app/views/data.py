@@ -64,7 +64,7 @@ def _scroll_to_top_if_requested() -> None:
         [30, 120, 300, 600].forEach(ms => setTimeout(toTop, ms));
         </script>
         """,
-        height=0,
+        height=1,  # Streamlit >= 1.60 rejects 0: height must be a positive int
     )
 
 

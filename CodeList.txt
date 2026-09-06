@@ -14,7 +14,7 @@ own work. It holds the ideas the project is about: the semantic roles, the
 progressive-unlock rules, the SQL generation, and the read-only validation of
 generated queries. I can explain and defend any of it in detail.
 
-AI assistance was used in two places, for two reasons.
+AI assistance was used in three places.
 
   The interface (app/) goes beyond what the taught material covers — a
   themed dark interface, a staggered landing-page entrance, and an animated
@@ -27,6 +27,11 @@ AI assistance was used in two places, for two reasons.
   what each area had to guarantee and reviewed the result; AI assistance was
   used to generate cases and to find gaps in coverage. I added tests myself
   for defects found during development.
+
+  The evaluation scripts (evaluation/) were produced from my specification: I
+  defined the question categories, what counts as a correct answer and the
+  two clients to compare; AI assistance helped write the questions, the
+  reference SQL and the script that runs and grades them.
 
 I am able to explain the AI-assisted code as well — the attribution reflects
 who produced it, not what I understand.
@@ -150,7 +155,7 @@ Interface — app/
 
 Tests — tests/
   Written to my specification with AI assistance in generating cases and
-  finding gaps. 121 cases across the services and the application.
+  finding gaps. 126 cases across the services and the application.
 
   conftest.py              Shared fixtures, including a small synthetic dataset
                            whose expected results can be checked by hand.
@@ -164,3 +169,18 @@ Tests — tests/
                            in pandas 3, which had silently disabled whitespace
                            detection, and filenames that leave no usable table
                            name.
+
+Evaluation — evaluation/
+  Produced with AI assistance from my specification. I defined the eight
+  question categories, what counts as a correct answer, and the two clients
+  to compare (the offline stub and gpt-4o-mini); AI assistance helped write
+  the questions, the reference SQL and the script that runs and grades them.
+  The figures in the dissertation come from running that script on the study
+  dataset.
+
+  nl_benchmark_questions.py  The 30 benchmark questions with their reference
+                           SQL, grouped into eight categories.
+  run_nl_benchmark.py      Runs the benchmark against either client, grades
+                           every answer and writes the result files.
+  results_*.csv            Raw and re-graded results of the runs reported in
+                           the dissertation.
