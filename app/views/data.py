@@ -88,6 +88,9 @@ def render() -> None:
 # --------------------------------------------------------------------------- #
 def _wizard(ws: Workspace) -> None:
     _scroll_to_top_if_requested()
+    notice = st.session_state.pop("wiz_notice", None)
+    if notice:
+        st.info(notice)
     step = st.session_state.get("wiz_step", 1)
     labels = ["1. Upload", "2. Clean", "3. Configure"]
     st.caption("  →  ".join(f"**{l}**" if i + 1 == step else l
@@ -196,7 +199,14 @@ def _step_configure(ws: Workspace) -> None:
         ws.project.tables = [t for t in ws.project.tables if t.name != name] + [table]
         st.session_state.wiz_stored = name
 
-    table = next(t for t in ws.project.tables if t.name == name)
+    table = next((t for t in ws.project.tables if t.name == name), None)
+    if table is None:
+        # The wizard state came from another project (switched mid-upload):
+        # start the wizard again instead of failing.
+        for key in _WIZ_KEYS:
+            st.session_state.pop(key, None)
+        st.session_state.wiz_notice = "That upload belonged to a different project — please upload the file again."
+        st.rerun()
     st.success(f"Stored as `{table.name}`. Confirm the roles and join keys below.")
     _role_editor(ws, table, scope="wizard")
 

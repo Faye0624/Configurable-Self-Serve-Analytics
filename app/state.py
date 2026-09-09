@@ -92,10 +92,15 @@ def open_project(project: Project) -> None:
     st.session_state.screen = "Data"      # opening a project starts at its data
 
 
+# The upload wizard's state belongs to the open project: an upload left half-way
+# in one project must not resurface in the next one (it would look for a table
+# that project does not have).
+_WIZARD_KEYS = ("wiz_step", "wiz_df", "wiz_name", "wiz_source", "wiz_cleaned", "wiz_stored")
+
+
 def close_workspace() -> None:
-    st.session_state.pop("workspace", None)
-    st.session_state.pop("project_id", None)
-    st.session_state.pop("screen", None)
+    for key in ("workspace", "project_id", "screen", *_WIZARD_KEYS):
+        st.session_state.pop(key, None)
 
 
 def get_workspace() -> Workspace | None:
